@@ -1,0 +1,96 @@
+# yaml-language-server: $schema=https://topaz.sh/schema/config.json
+#
+# Britannia Phase 2 — Topaz 0.33.16 no-TLS config.
+# Structure is verbatim from the verified reference (topaz-reference.md §4.3).
+# `version: 2` is the CONFIG FILE schema version (unrelated to the directory
+# model's `version: 3`); both numbers are correct. See §12.9.
+---
+version: 2
+
+logging:
+  prod: false
+  log_level: info
+
+directory:
+  db_path: /db/directory.db
+  request_timeout: 5s
+
+# The authorizer uses this client to resolve identities against its own reader service.
+remote_directory:
+  address: "0.0.0.0:9292"
+  insecure: false          # MUST be present and false; see §12.1 — omitting it
+                           # defaults to true and collides with no_tls, crashing boot.
+  no_tls: true             # plaintext, because the reader below has no certs
+  no_proxy: false
+  api_key: ""              # MUST match auth.keys when API keys are enabled; see §11.3
+  token: ""
+  client_cert_path: ""
+  client_key_path: ""
+  ca_cert_path: ""
+  headers:
+
+jwt:
+  acceptable_time_skew_seconds: 5
+
+auth:
+  keys:
+  options:
+    default:
+      enable_api_key: false
+      enable_anonymous: true
+
+api:
+  health:
+    listen_address: "0.0.0.0:9494"
+  metrics:
+    listen_address: "0.0.0.0:9696"
+  services:
+    model:
+      grpc:
+        listen_address: "0.0.0.0:9292"
+      gateway:
+        listen_address: "0.0.0.0:9393"
+        allowed_origins: [http://localhost, "http://localhost:*"]
+    reader:
+      needs: [model]
+      grpc:
+        listen_address: "0.0.0.0:9292"
+      gateway:
+        listen_address: "0.0.0.0:9393"
+        allowed_origins: [http://localhost, "http://localhost:*"]
+    writer:
+      needs: [model]
+      grpc:
+        listen_address: "0.0.0.0:9292"
+      gateway:
+        listen_address: "0.0.0.0:9393"
+        allowed_origins: [http://localhost, "http://localhost:*"]
+    importer:
+      needs: [model]
+      grpc:
+        listen_address: "0.0.0.0:9292"
+      gateway:
+        listen_address: "0.0.0.0:9393"
+        allowed_origins: [http://localhost, "http://localhost:*"]
+    exporter:
+      grpc:
+        listen_address: "0.0.0.0:9292"
+      gateway:
+        listen_address: "0.0.0.0:9393"
+        allowed_origins: [http://localhost, "http://localhost:*"]
+    authorizer:
+      needs: [reader]
+      grpc:
+        connection_timeout_seconds: 2
+        listen_address: "0.0.0.0:8282"
+      gateway:
+        listen_address: "0.0.0.0:8383"
+        allowed_origins: [http://localhost, "http://localhost:*"]
+
+opa:
+  instance_id: "-"
+  graceful_shutdown_period_seconds: 2
+  local_bundles:
+    paths:
+      - /bundle
+    skip_verification: true

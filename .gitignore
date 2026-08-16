@@ -1,0 +1,28 @@
+.venv/
+**/__pycache__/
+*.py[cod]
+
+# Scratch discovery material was not retained as publishable evidence.
+_scout/
+docs/discovery-notes/
+
+# Deterministic/generated experiment inputs and outputs.
+01-source/generated/
+01-source/topology/
+02-synthworld-public/
+03-topaz-input/MAPPING.md
+03-topaz-input/PROJECTION-SUMMARY.json
+03-topaz-input/directory/
+03-topaz-input/model/
+03-topaz-input/policy/
+03-topaz-input/requests/
+04-topaz-results/
+05-submission/
+06-evaluator/
+reports/
+viz/
+infra/policy/
+
+# Local tool state.
+.qwen/
+.codex/

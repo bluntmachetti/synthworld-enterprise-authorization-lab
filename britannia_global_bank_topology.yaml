@@ -1,0 +1,3261 @@
+organisation:
+  name: Britannia Global Bank
+  scale_preset: global_enterprise
+  industry_preset: financial_services
+  regions:
+  - UK South (London)
+  - EU West (Ireland)
+  - EU Central (Frankfurt)
+  - US East (Virginia)
+  - Asia Pacific (Singapore)
+  metadata:
+    headquarters: London, UK
+    benchmark_reference: Fictional UK universal bank sized and geographically shaped
+      against a Barclays-like operating model
+    employee_count_total: 94000
+    technology_and_operations_fte: 14950
+    legal_entity_footprint:
+      uk: Primary booking centre, retail and ring-fenced bank
+      europe: Smaller but material EEA banking and payments footprint
+      americas: Markets, treasury, custody and corporate banking offices
+      apac_mea: Regional dealing rooms and transaction banking hubs
+    major_offices:
+    - London
+    - Manchester
+    - Glasgow
+    - Dublin
+    - Frankfurt
+    - Paris
+    - New York
+    - Singapore
+    - Hong Kong
+    - Tokyo
+    - Sydney
+    - Dubai
+    - Toronto
+    lines_of_defence:
+      first_line:
+      - Service owning engineering teams
+      - Platform and SRE operations
+      second_line:
+      - Vendor & Resilience Office
+      - Cyber Security Engineering
+      - Financial Crime and Compliance
+      third_line:
+      - Internal Audit and model validation
+    important_business_services:
+    - Retail digital banking
+    - Corporate cash management
+    - Payments execution
+    - Cards authorisation
+    - Liquidity management
+    - Markets execution
+    - Sanctions and AML screening
+    regulatory_structure:
+      eu_eea:
+      - DORA
+      - NIS2
+      - GDPR
+      uk:
+      - UK_OR
+      - PRA_SS1_21
+      - FCA_PS21_3
+      us:
+      - NYDFS_500
+      - FRB_OCC_FDIC_OR
+      singapore:
+      - MAS_TRM
+      hong_kong:
+      - HKMA_OR2
+      australia:
+      - APRA_CPS230
+      canada:
+      - OSFI_B13
+    target_operating_model: UK-led, EEA-resilient, follow-the-sun operations with
+      diversified cloud and specialist banking SaaS
+    team_model: Portfolio/platform teams aggregating multiple product squads
+    annual_revenue_usd: 36200000000
+    it_budget_usd: 3100000000
+vendors:
+- name: Amazon Web Services
+  vendor_type: cloud_provider
+  criticality_to_org: critical
+  monthly_cost_usd: 2400000.0
+  headquarters_country: US
+  jurisdiction: US
+  ownership_structure:
+    parent_company: Amazon Web Services
+    country: US
+    publicly_traded: true
+  alternative_vendors:
+  - Microsoft Azure
+  - Google Cloud Platform
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+    - PCI-DSS
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: aws
+- name: Microsoft Azure
+  vendor_type: cloud_provider
+  criticality_to_org: critical
+  monthly_cost_usd: 2250000.0
+  headquarters_country: US
+  jurisdiction: US
+  ownership_structure:
+    parent_company: Microsoft Azure
+    country: US
+    publicly_traded: true
+  alternative_vendors:
+  - Amazon Web Services
+  - Google Cloud Platform
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+    - PCI-DSS
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: azure
+- name: Google Cloud Platform
+  vendor_type: cloud_provider
+  criticality_to_org: high
+  monthly_cost_usd: 1800000.0
+  headquarters_country: US
+  jurisdiction: US
+  ownership_structure:
+    parent_company: Google Cloud Platform
+    country: US
+    publicly_traded: true
+  alternative_vendors:
+  - Amazon Web Services
+  - Microsoft Azure
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+    - PCI-DSS
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: gcp
+- name: Datadog
+  vendor_type: devops_platform
+  criticality_to_org: high
+  monthly_cost_usd: 420000.0
+  headquarters_country: US
+  jurisdiction: US
+  ownership_structure:
+    parent_company: Datadog
+    country: US
+    publicly_traded: true
+  alternative_vendors:
+  - Splunk Cloud
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: datadog
+- name: Bloomberg
+  vendor_type: data_analytics
+  criticality_to_org: critical
+  monthly_cost_usd: 860000.0
+  headquarters_country: US
+  jurisdiction: US
+  ownership_structure:
+    parent_company: Bloomberg
+    country: US
+    publicly_traded: true
+  alternative_vendors:
+  - LSEG Workspace
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  catalogue_slug: bloomberg
+- name: SAP
+  vendor_type: saas
+  criticality_to_org: high
+  monthly_cost_usd: 510000.0
+  headquarters_country: DE
+  jurisdiction: DE
+  ownership_structure:
+    parent_company: SAP
+    country: DE
+    publicly_traded: true
+  alternative_vendors:
+  - ServiceNow
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: sap
+- name: FIS Global
+  vendor_type: saas
+  criticality_to_org: critical
+  monthly_cost_usd: 950000.0
+  headquarters_country: US
+  jurisdiction: US
+  ownership_structure:
+    parent_company: FIS Global
+    country: US
+    publicly_traded: true
+  alternative_vendors:
+  - Temenos
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+    - PCI-DSS
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: fis-global
+- name: Temenos
+  vendor_type: saas
+  criticality_to_org: high
+  monthly_cost_usd: 440000.0
+  headquarters_country: CH
+  jurisdiction: CH
+  ownership_structure:
+    parent_company: Temenos
+    country: CH
+    publicly_traded: true
+  alternative_vendors:
+  - FIS Global
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: temenos
+- name: Murex
+  vendor_type: saas
+  criticality_to_org: critical
+  monthly_cost_usd: 780000.0
+  headquarters_country: FR
+  jurisdiction: FR
+  ownership_structure:
+    parent_company: Murex
+    country: FR
+    publicly_traded: true
+  alternative_vendors:
+  - Adenza
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: murex
+- name: Adenza
+  vendor_type: saas
+  criticality_to_org: high
+  monthly_cost_usd: 420000.0
+  headquarters_country: US
+  jurisdiction: US
+  ownership_structure:
+    parent_company: Adenza
+    country: US
+    publicly_traded: true
+  alternative_vendors:
+  - Murex
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: adenza
+- name: NICE Actimize
+  vendor_type: security
+  criticality_to_org: critical
+  monthly_cost_usd: 560000.0
+  headquarters_country: US
+  jurisdiction: US
+  ownership_structure:
+    parent_company: NICE Actimize
+    country: US
+    publicly_traded: true
+  alternative_vendors:
+  - Quantexa
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: nice-actimize
+- name: Quantexa
+  vendor_type: ai_ml
+  criticality_to_org: high
+  monthly_cost_usd: 390000.0
+  headquarters_country: GB
+  jurisdiction: GB
+  ownership_structure:
+    parent_company: Quantexa
+    country: GB
+    publicly_traded: true
+  alternative_vendors:
+  - NICE Actimize
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: quantexa
+- name: SailPoint
+  vendor_type: identity_provider
+  criticality_to_org: high
+  monthly_cost_usd: 260000.0
+  headquarters_country: US
+  jurisdiction: US
+  ownership_structure:
+    parent_company: SailPoint
+    country: US
+    publicly_traded: true
+  alternative_vendors:
+  - Microsoft Azure
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: sailpoint
+- name: Bottomline
+  vendor_type: communication
+  criticality_to_org: high
+  monthly_cost_usd: 310000.0
+  headquarters_country: US
+  jurisdiction: US
+  ownership_structure:
+    parent_company: Bottomline
+    country: US
+    publicly_traded: true
+  alternative_vendors:
+  - Finastra
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: bottomline
+- name: Finastra
+  vendor_type: saas
+  criticality_to_org: high
+  monthly_cost_usd: 240000.0
+  headquarters_country: GB
+  jurisdiction: GB
+  ownership_structure:
+    parent_company: Finastra
+    country: GB
+    publicly_traded: true
+  alternative_vendors:
+  - Bottomline
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: finastra
+- name: Snowflake
+  vendor_type: data_analytics
+  criticality_to_org: high
+  monthly_cost_usd: 620000.0
+  headquarters_country: US
+  jurisdiction: US
+  ownership_structure:
+    parent_company: Snowflake
+    country: US
+    publicly_traded: true
+  alternative_vendors:
+  - Databricks
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: snowflake
+- name: Databricks
+  vendor_type: data_analytics
+  criticality_to_org: high
+  monthly_cost_usd: 460000.0
+  headquarters_country: US
+  jurisdiction: US
+  ownership_structure:
+    parent_company: Databricks
+    country: US
+    publicly_traded: true
+  alternative_vendors:
+  - Snowflake
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: databricks
+- name: LSEG Workspace
+  vendor_type: data_analytics
+  criticality_to_org: high
+  monthly_cost_usd: 340000.0
+  headquarters_country: GB
+  jurisdiction: GB
+  ownership_structure:
+    parent_company: LSEG Workspace
+    country: GB
+    publicly_traded: true
+  alternative_vendors:
+  - Bloomberg
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  catalogue_slug: lseg-workspace
+- name: ServiceNow
+  vendor_type: saas
+  criticality_to_org: high
+  monthly_cost_usd: 280000.0
+  headquarters_country: US
+  jurisdiction: US
+  ownership_structure:
+    parent_company: ServiceNow
+    country: US
+    publicly_traded: true
+  alternative_vendors:
+  - SAP
+  metadata:
+    exit_plan: true
+    contractual_terms: true
+    certifications:
+    - SOC2
+    - ISO27001
+  data_processor: true
+  security_assessment_date: '2026-02-15T00:00:00Z'
+  catalogue_slug: servicenow
+services:
+- name: retail-digital-banking-portal
+  service_type: api
+  criticality: high
+  sla_availability_target: 0.9997
+  baseline_latency_ms: 110.0
+  baseline_throughput_rps: 14000.0
+  baseline_error_rate: 0.0025
+  monthly_cost_usd: 420000.0
+  metadata:
+    expected_mttr_minutes: 20
+    network_zone: dmz
+    last_resilience_test_days: 60
+    important_business_service: Retail digital banking
+    customer_segment: retail
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - GDPR
+  data_classification: confidential
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: corporate-online-banking
+  service_type: api
+  criticality: high
+  sla_availability_target: 0.9997
+  baseline_latency_ms: 125.0
+  baseline_throughput_rps: 9000.0
+  baseline_error_rate: 0.0025
+  monthly_cost_usd: 390000.0
+  metadata:
+    expected_mttr_minutes: 20
+    network_zone: dmz
+    last_resilience_test_days: 75
+    important_business_service: Corporate cash management
+    customer_segment: corporate
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - GDPR
+  - NYDFS_500
+  data_classification: confidential
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: wealth-mobile-backend
+  service_type: api
+  criticality: high
+  sla_availability_target: 0.9996
+  baseline_latency_ms: 130.0
+  baseline_throughput_rps: 6500.0
+  baseline_error_rate: 0.003
+  monthly_cost_usd: 260000.0
+  metadata:
+    expected_mttr_minutes: 25
+    network_zone: dmz
+    last_resilience_test_days: 90
+    important_business_service: Wealth client access
+    customer_segment: wealth
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - GDPR
+  - MAS_TRM
+  - HKMA_OR2
+  data_classification: confidential
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: api-gateway
+  service_type: api
+  criticality: critical
+  sla_availability_target: 0.99995
+  baseline_latency_ms: 45.0
+  baseline_throughput_rps: 26000.0
+  baseline_error_rate: 0.001
+  monthly_cost_usd: 510000.0
+  metadata:
+    expected_mttr_minutes: 10
+    network_zone: dmz
+    last_resilience_test_days: 30
+    important_business_service: Shared channel ingress
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - GDPR
+  - NYDFS_500
+  - MAS_TRM
+  - HKMA_OR2
+  data_classification: internal
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: identity-access-platform
+  service_type: api
+  criticality: critical
+  sla_availability_target: 0.99995
+  baseline_latency_ms: 35.0
+  baseline_throughput_rps: 18000.0
+  baseline_error_rate: 0.001
+  monthly_cost_usd: 460000.0
+  metadata:
+    expected_mttr_minutes: 10
+    network_zone: application
+    last_resilience_test_days: 45
+    important_business_service: Identity and access control
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - GDPR
+  - NYDFS_500
+  - MAS_TRM
+  - HKMA_OR2
+  data_classification: confidential
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: customer-360-service
+  service_type: api
+  criticality: high
+  sla_availability_target: 0.9999
+  baseline_latency_ms: 55.0
+  baseline_throughput_rps: 12000.0
+  baseline_error_rate: 0.0015
+  monthly_cost_usd: 380000.0
+  metadata:
+    expected_mttr_minutes: 20
+    network_zone: application
+    last_resilience_test_days: 55
+    business_capability: Customer servicing
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - GDPR
+  data_classification: confidential
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: consent-privacy-service
+  service_type: api
+  criticality: medium
+  sla_availability_target: 0.9995
+  baseline_latency_ms: 60.0
+  baseline_throughput_rps: 5000.0
+  baseline_error_rate: 0.002
+  monthly_cost_usd: 180000.0
+  metadata:
+    expected_mttr_minutes: 30
+    network_zone: application
+    business_capability: Consent and privacy controls
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - GDPR
+  data_classification: confidential
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: customer-master-db
+  service_type: database
+  criticality: high
+  sla_availability_target: 0.99995
+  baseline_latency_ms: 12.0
+  baseline_throughput_rps: 28000.0
+  baseline_error_rate: 0.0003
+  monthly_cost_usd: 610000.0
+  metadata:
+    expected_mttr_minutes: 25
+    network_zone: data
+    last_resilience_test_days: 40
+    backup_policy:
+      frequency: hourly
+      retention_days: 365
+      tested_within_days: 30
+      encryption_at_rest: true
+    rpo_minutes: 5
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - GDPR
+  data_classification: restricted
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: core-banking-ledger
+  service_type: api
+  criticality: critical
+  sla_availability_target: 0.99995
+  baseline_latency_ms: 40.0
+  baseline_throughput_rps: 16000.0
+  baseline_error_rate: 0.0008
+  monthly_cost_usd: 860000.0
+  metadata:
+    expected_mttr_minutes: 10
+    network_zone: application
+    last_resilience_test_days: 35
+    important_business_service: Deposit and account servicing
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - GDPR
+  - NYDFS_500
+  data_classification: restricted
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: current-accounts-db
+  service_type: database
+  criticality: critical
+  sla_availability_target: 0.99999
+  baseline_latency_ms: 8.0
+  baseline_throughput_rps: 42000.0
+  baseline_error_rate: 0.0002
+  monthly_cost_usd: 980000.0
+  metadata:
+    expected_mttr_minutes: 15
+    network_zone: data
+    last_resilience_test_days: 28
+    backup_policy:
+      frequency: continuous
+      retention_days: 730
+      tested_within_days: 21
+      encryption_at_rest: true
+    rpo_minutes: 1
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - GDPR
+  - NYDFS_500
+  data_classification: restricted
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: cards-authorisation-switch
+  service_type: api
+  criticality: critical
+  sla_availability_target: 0.99995
+  baseline_latency_ms: 25.0
+  baseline_throughput_rps: 22000.0
+  baseline_error_rate: 0.0009
+  monthly_cost_usd: 720000.0
+  metadata:
+    expected_mttr_minutes: 10
+    network_zone: application
+    last_resilience_test_days: 30
+    important_business_service: Cards authorisation
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - PCI_DSS
+  - NYDFS_500
+  data_classification: restricted
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: cards-ledger-db
+  service_type: database
+  criticality: high
+  sla_availability_target: 0.99999
+  baseline_latency_ms: 10.0
+  baseline_throughput_rps: 32000.0
+  baseline_error_rate: 0.0002
+  monthly_cost_usd: 760000.0
+  metadata:
+    expected_mttr_minutes: 20
+    network_zone: data
+    last_resilience_test_days: 32
+    backup_policy:
+      frequency: continuous
+      retention_days: 365
+      tested_within_days: 28
+      encryption_at_rest: true
+    rpo_minutes: 1
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - PCI_DSS
+  data_classification: restricted
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: payments-orchestration-hub
+  service_type: api
+  criticality: critical
+  sla_availability_target: 0.99995
+  baseline_latency_ms: 45.0
+  baseline_throughput_rps: 17000.0
+  baseline_error_rate: 0.001
+  monthly_cost_usd: 690000.0
+  metadata:
+    expected_mttr_minutes: 10
+    network_zone: application
+    last_resilience_test_days: 25
+    important_business_service: Payments execution
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - PCI_DSS
+  - MAS_TRM
+  - HKMA_OR2
+  data_classification: restricted
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: payments-event-bus
+  service_type: queue
+  criticality: high
+  sla_availability_target: 0.99999
+  baseline_latency_ms: 18.0
+  baseline_throughput_rps: 24000.0
+  baseline_error_rate: 0.0002
+  monthly_cost_usd: 260000.0
+  metadata:
+    expected_mttr_minutes: 20
+    network_zone: data
+    last_resilience_test_days: 50
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - PCI_DSS
+  data_classification: internal
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: swift-messaging-gateway
+  service_type: api
+  criticality: critical
+  sla_availability_target: 0.99995
+  baseline_latency_ms: 55.0
+  baseline_throughput_rps: 8500.0
+  baseline_error_rate: 0.0012
+  monthly_cost_usd: 430000.0
+  metadata:
+    expected_mttr_minutes: 15
+    network_zone: application
+    last_resilience_test_days: 40
+    important_business_service: Cross-border payments
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - MAS_TRM
+  - HKMA_OR2
+  data_classification: restricted
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: uk-sepa-clearing-network
+  service_type: external
+  criticality: high
+  sla_availability_target: 0.9999
+  baseline_latency_ms: 80.0
+  baseline_throughput_rps: 12000.0
+  baseline_error_rate: 0.001
+  monthly_cost_usd: 0.0
+  metadata:
+    expected_mttr_minutes: 120
+    network_zone: external
+    external_party_type: market_infrastructure
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  data_classification: restricted
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: swift-network
+  service_type: external
+  criticality: critical
+  sla_availability_target: 0.9999
+  baseline_latency_ms: 90.0
+  baseline_throughput_rps: 6000.0
+  baseline_error_rate: 0.001
+  monthly_cost_usd: 0.0
+  metadata:
+    expected_mttr_minutes: 180
+    network_zone: external
+    external_party_type: financial_messaging_network
+  regulatory_scope:
+  - DORA
+  - MAS_TRM
+  - HKMA_OR2
+  data_classification: restricted
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: treasury-liquidity-engine
+  service_type: api
+  criticality: critical
+  sla_availability_target: 0.99995
+  baseline_latency_ms: 50.0
+  baseline_throughput_rps: 7000.0
+  baseline_error_rate: 0.001
+  monthly_cost_usd: 510000.0
+  metadata:
+    expected_mttr_minutes: 15
+    network_zone: application
+    last_resilience_test_days: 65
+    important_business_service: Liquidity and intraday funding
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NYDFS_500
+  - HKMA_OR2
+  data_classification: confidential
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: securities-trading-platform
+  service_type: api
+  criticality: high
+  sla_availability_target: 0.9999
+  baseline_latency_ms: 35.0
+  baseline_throughput_rps: 9500.0
+  baseline_error_rate: 0.0015
+  monthly_cost_usd: 620000.0
+  metadata:
+    expected_mttr_minutes: 20
+    network_zone: application
+    last_resilience_test_days: 70
+    important_business_service: Markets execution
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NYDFS_500
+  - HKMA_OR2
+  data_classification: confidential
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: market-data-distribution
+  service_type: api
+  criticality: high
+  sla_availability_target: 0.9999
+  baseline_latency_ms: 22.0
+  baseline_throughput_rps: 14000.0
+  baseline_error_rate: 0.001
+  monthly_cost_usd: 370000.0
+  metadata:
+    expected_mttr_minutes: 25
+    network_zone: application
+    last_resilience_test_days: 80
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NYDFS_500
+  - HKMA_OR2
+  data_classification: internal
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: aml-sanctions-engine
+  service_type: api
+  criticality: critical
+  sla_availability_target: 0.99995
+  baseline_latency_ms: 60.0
+  baseline_throughput_rps: 10000.0
+  baseline_error_rate: 0.001
+  monthly_cost_usd: 540000.0
+  metadata:
+    expected_mttr_minutes: 15
+    network_zone: application
+    last_resilience_test_days: 42
+    important_business_service: Sanctions and AML screening
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - GDPR
+  - MAS_TRM
+  - HKMA_OR2
+  data_classification: restricted
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: fraud-decision-engine
+  service_type: api
+  criticality: high
+  sla_availability_target: 0.9999
+  baseline_latency_ms: 40.0
+  baseline_throughput_rps: 15000.0
+  baseline_error_rate: 0.0012
+  monthly_cost_usd: 470000.0
+  metadata:
+    expected_mttr_minutes: 20
+    network_zone: application
+    last_resilience_test_days: 50
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - PCI_DSS
+  - GDPR
+  - MAS_TRM
+  data_classification: confidential
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: sanctions-case-management
+  service_type: api
+  criticality: medium
+  sla_availability_target: 0.9995
+  baseline_latency_ms: 90.0
+  baseline_throughput_rps: 2200.0
+  baseline_error_rate: 0.003
+  monthly_cost_usd: 210000.0
+  metadata:
+    expected_mttr_minutes: 45
+    network_zone: application
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - GDPR
+  data_classification: confidential
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: reg-reporting-platform
+  service_type: worker
+  criticality: high
+  sla_availability_target: 0.9997
+  baseline_latency_ms: 1800.0
+  baseline_throughput_rps: 120.0
+  baseline_error_rate: 0.01
+  monthly_cost_usd: 340000.0
+  metadata:
+    expected_mttr_minutes: 45
+    network_zone: application
+    last_resilience_test_days: 85
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - GDPR
+  - MAS_TRM
+  - HKMA_OR2
+  - APRA_CPS230
+  - OSFI_B13
+  data_classification: confidential
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: enterprise-data-lakehouse
+  service_type: database
+  criticality: high
+  sla_availability_target: 0.99995
+  baseline_latency_ms: 18.0
+  baseline_throughput_rps: 20000.0
+  baseline_error_rate: 0.0004
+  monthly_cost_usd: 890000.0
+  metadata:
+    expected_mttr_minutes: 30
+    network_zone: data
+    last_resilience_test_days: 35
+    backup_policy:
+      frequency: hourly
+      retention_days: 365
+      tested_within_days: 30
+      encryption_at_rest: true
+    rpo_minutes: 15
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - GDPR
+  - NYDFS_500
+  - MAS_TRM
+  - HKMA_OR2
+  - APRA_CPS230
+  - OSFI_B13
+  data_classification: restricted
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: resilience-testing-orchestrator
+  service_type: worker
+  criticality: medium
+  sla_availability_target: 0.999
+  baseline_latency_ms: 2400.0
+  baseline_throughput_rps: 40.0
+  baseline_error_rate: 0.015
+  monthly_cost_usd: 160000.0
+  metadata:
+    expected_mttr_minutes: 60
+    network_zone: management
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - APRA_CPS230
+  data_classification: internal
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: vendor-risk-assessment-service
+  service_type: api
+  criticality: medium
+  sla_availability_target: 0.9995
+  baseline_latency_ms: 95.0
+  baseline_throughput_rps: 900.0
+  baseline_error_rate: 0.003
+  monthly_cost_usd: 140000.0
+  metadata:
+    expected_mttr_minutes: 60
+    network_zone: management
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - APRA_CPS230
+  - OSFI_B13
+  data_classification: internal
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: observability-platform
+  service_type: api
+  criticality: high
+  sla_availability_target: 0.9999
+  baseline_latency_ms: 70.0
+  baseline_throughput_rps: 20000.0
+  baseline_error_rate: 0.001
+  monthly_cost_usd: 330000.0
+  metadata:
+    expected_mttr_minutes: 20
+    network_zone: management
+    last_resilience_test_days: 48
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - APRA_CPS230
+  data_classification: internal
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: secrets-vault-service
+  service_type: api
+  criticality: critical
+  sla_availability_target: 0.99995
+  baseline_latency_ms: 18.0
+  baseline_throughput_rps: 18000.0
+  baseline_error_rate: 0.0008
+  monthly_cost_usd: 300000.0
+  metadata:
+    expected_mttr_minutes: 10
+    network_zone: management
+    last_resilience_test_days: 30
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - NYDFS_500
+  - MAS_TRM
+  - HKMA_OR2
+  data_classification: restricted
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: ci-cd-platform
+  service_type: api
+  criticality: medium
+  sla_availability_target: 0.999
+  baseline_latency_ms: 120.0
+  baseline_throughput_rps: 3500.0
+  baseline_error_rate: 0.01
+  monthly_cost_usd: 190000.0
+  metadata:
+    expected_mttr_minutes: 45
+    network_zone: management
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  data_classification: internal
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: customer-notifications-service
+  service_type: worker
+  criticality: medium
+  sla_availability_target: 0.9992
+  baseline_latency_ms: 900.0
+  baseline_throughput_rps: 450.0
+  baseline_error_rate: 0.02
+  monthly_cost_usd: 170000.0
+  metadata:
+    expected_mttr_minutes: 45
+    network_zone: application
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - GDPR
+  data_classification: confidential
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: session-cache
+  service_type: cache
+  criticality: high
+  sla_availability_target: 0.9999
+  baseline_latency_ms: 3.0
+  baseline_throughput_rps: 30000.0
+  baseline_error_rate: 0.0004
+  monthly_cost_usd: 150000.0
+  metadata:
+    expected_mttr_minutes: 15
+    network_zone: data
+    last_resilience_test_days: 60
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  data_classification: internal
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: payment-clearing-reconciliation
+  service_type: worker
+  criticality: high
+  sla_availability_target: 0.9995
+  baseline_latency_ms: 2200.0
+  baseline_throughput_rps: 85.0
+  baseline_error_rate: 0.012
+  monthly_cost_usd: 260000.0
+  metadata:
+    expected_mttr_minutes: 40
+    network_zone: application
+    last_resilience_test_days: 75
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - NIS2
+  - GDPR
+  - MAS_TRM
+  - HKMA_OR2
+  data_classification: confidential
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: card-scheme-network
+  service_type: external
+  criticality: high
+  sla_availability_target: 0.9999
+  baseline_latency_ms: 70.0
+  baseline_throughput_rps: 15000.0
+  baseline_error_rate: 0.001
+  monthly_cost_usd: 0.0
+  metadata:
+    expected_mttr_minutes: 120
+    network_zone: external
+    external_party_type: card_scheme
+  regulatory_scope:
+  - PCI_DSS
+  - UK_OR
+  - DORA
+  data_classification: restricted
+  bcm_plan: true
+  disaster_recovery_plan: true
+- name: branch-contact-centre-integration
+  service_type: api
+  criticality: medium
+  sla_availability_target: 0.9993
+  baseline_latency_ms: 140.0
+  baseline_throughput_rps: 1800.0
+  baseline_error_rate: 0.004
+  monthly_cost_usd: 120000.0
+  metadata:
+    expected_mttr_minutes: 50
+    network_zone: application
+  regulatory_scope:
+  - UK_OR
+  - DORA
+  - GDPR
+  data_classification: confidential
+  incident_reporting_contact: group-incident-reporting@britanniaglobalbank.example
+  bcm_plan: true
+  disaster_recovery_plan: true
+teams:
+- name: Retail Digital Banking
+  team_type: product
+  headcount: 1650
+  key_capabilities:
+  - Retail web journeys
+  - API channel experience
+  - Digital servicing
+  - Customer authentication UX
+- name: Corporate & Cash Channels
+  team_type: product
+  headcount: 1200
+  key_capabilities:
+  - Corporate portal
+  - Cash management journeys
+  - Branch and contact centre integration
+  - Client onboarding pathways
+- name: Wealth Platforms
+  team_type: product
+  headcount: 700
+  key_capabilities:
+  - Wealth mobile experience
+  - Advisor tooling integration
+  - Portfolio access journeys
+- name: Customer Data & CRM
+  team_type: product
+  headcount: 950
+  key_capabilities:
+  - Customer 360
+  - Master data stewardship
+  - Consent and privacy controls
+  - Client notifications
+- name: Core Banking Engineering
+  team_type: product
+  headcount: 1750
+  key_capabilities:
+  - Deposit ledger
+  - Account servicing
+  - Balance and posting controls
+- name: Cards & Consumer Finance
+  team_type: product
+  headcount: 900
+  key_capabilities:
+  - Card switch
+  - Card ledger
+  - Consumer lending integrations
+- name: Payments Engineering
+  team_type: product
+  headcount: 1400
+  key_capabilities:
+  - Payments orchestration
+  - Market infrastructure connectivity
+  - Clearing and reconciliation
+- name: Treasury Platforms
+  team_type: product
+  headcount: 650
+  key_capabilities:
+  - Liquidity management
+  - Intraday funding
+  - Cash positioning
+- name: Markets Technology
+  team_type: product
+  headcount: 1050
+  key_capabilities:
+  - Execution platforms
+  - Market data distribution
+  - Front-office workflow automation
+- name: Financial Crime Technology
+  team_type: product
+  headcount: 900
+  key_capabilities:
+  - AML and sanctions screening
+  - Fraud analytics
+  - Case management
+- name: Regulatory Data & Reporting
+  team_type: product
+  headcount: 850
+  key_capabilities:
+  - Regulatory reporting
+  - Data lakehouse
+  - Supervisory evidence packs
+- name: Platform Engineering
+  team_type: platform
+  headcount: 1650
+  key_capabilities:
+  - CI/CD
+  - Runtime platform
+  - Caching
+  - Shared developer tooling
+- name: SRE & Observability
+  team_type: sre
+  headcount: 800
+  key_capabilities:
+  - Production reliability
+  - Telemetry
+  - Incident command
+  - Resilience testing automation
+- name: Cyber Security Engineering
+  team_type: security
+  headcount: 900
+  key_capabilities:
+  - Identity platform
+  - Secrets management
+  - Security architecture
+  - Privileged access
+- name: Vendor & Resilience Office
+  team_type: shared_services
+  headcount: 500
+  key_capabilities:
+  - Third-party risk
+  - DORA oversight
+  - Exit planning
+  - Operational resilience governance
+domains:
+- name: Customer Channels
+  description: Retail, corporate and wealth-facing digital channels
+  parent_domain: null
+- name: Core Banking & Cards
+  description: Account, ledger and cards processing
+  parent_domain: null
+- name: Payments & Treasury
+  description: Payments execution, clearing, SWIFT and liquidity operations
+  parent_domain: null
+- name: Markets & Risk
+  description: Markets execution, market data, fraud and AML controls
+  parent_domain: null
+- name: Data & Regulatory Reporting
+  description: Data platforms, supervisory reporting and evidence stores
+  parent_domain: null
+- name: Platform Engineering
+  description: Runtime platform, SRE, observability and delivery tooling
+  parent_domain: null
+- name: Cyber Security
+  description: Identity, secrets, privacy and vendor resilience controls
+  parent_domain: null
+service_dependencies:
+- source: retail-digital-banking-portal
+  target: api-gateway
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 2500
+- source: corporate-online-banking
+  target: api-gateway
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 2500
+- source: wealth-mobile-backend
+  target: api-gateway
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 2500
+- source: api-gateway
+  target: identity-access-platform
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 800
+- source: api-gateway
+  target: customer-360-service
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 1200
+- source: api-gateway
+  target: core-banking-ledger
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 1400
+- source: api-gateway
+  target: cards-authorisation-switch
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 1200
+- source: api-gateway
+  target: payments-orchestration-hub
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 1300
+- source: api-gateway
+  target: customer-notifications-service
+  dependency_type: async_event
+  criticality: optional
+- source: api-gateway
+  target: branch-contact-centre-integration
+  dependency_type: sync_http
+  criticality: optional
+  timeout_ms: 2000
+- source: api-gateway
+  target: session-cache
+  dependency_type: data_read
+  criticality: degraded_operation
+  timeout_ms: 200
+- source: api-gateway
+  target: secrets-vault-service
+  dependency_type: sync_grpc
+  criticality: degraded_operation
+  timeout_ms: 250
+- source: api-gateway
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: identity-access-platform
+  target: consent-privacy-service
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 600
+- source: identity-access-platform
+  target: customer-master-db
+  dependency_type: data_read
+  criticality: degraded_operation
+  timeout_ms: 300
+- source: identity-access-platform
+  target: session-cache
+  dependency_type: data_write
+  criticality: degraded_operation
+  timeout_ms: 200
+- source: identity-access-platform
+  target: secrets-vault-service
+  dependency_type: sync_grpc
+  criticality: critical
+  timeout_ms: 250
+- source: identity-access-platform
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: customer-360-service
+  target: customer-master-db
+  dependency_type: data_read
+  criticality: critical
+  timeout_ms: 400
+- source: customer-360-service
+  target: consent-privacy-service
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 600
+- source: customer-360-service
+  target: customer-notifications-service
+  dependency_type: async_event
+  criticality: optional
+- source: customer-360-service
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: consent-privacy-service
+  target: customer-master-db
+  dependency_type: data_read
+  criticality: critical
+  timeout_ms: 300
+- source: consent-privacy-service
+  target: enterprise-data-lakehouse
+  dependency_type: data_write
+  criticality: optional
+  timeout_ms: 1200
+- source: consent-privacy-service
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: core-banking-ledger
+  target: current-accounts-db
+  dependency_type: data_write
+  criticality: critical
+  timeout_ms: 600
+- source: core-banking-ledger
+  target: customer-master-db
+  dependency_type: data_read
+  criticality: critical
+  timeout_ms: 500
+- source: core-banking-ledger
+  target: payments-event-bus
+  dependency_type: async_event
+  criticality: optional
+- source: core-banking-ledger
+  target: secrets-vault-service
+  dependency_type: sync_grpc
+  criticality: degraded_operation
+  timeout_ms: 250
+- source: core-banking-ledger
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: current-accounts-db
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: cards-authorisation-switch
+  target: cards-ledger-db
+  dependency_type: data_write
+  criticality: critical
+  timeout_ms: 500
+- source: cards-authorisation-switch
+  target: fraud-decision-engine
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 800
+- source: cards-authorisation-switch
+  target: card-scheme-network
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 1800
+- source: cards-authorisation-switch
+  target: secrets-vault-service
+  dependency_type: sync_grpc
+  criticality: degraded_operation
+  timeout_ms: 250
+- source: cards-authorisation-switch
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: cards-ledger-db
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: payments-orchestration-hub
+  target: fraud-decision-engine
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 900
+- source: payments-orchestration-hub
+  target: aml-sanctions-engine
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 900
+- source: payments-orchestration-hub
+  target: payments-event-bus
+  dependency_type: async_queue
+  criticality: critical
+- source: payments-orchestration-hub
+  target: swift-messaging-gateway
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 1500
+- source: payments-orchestration-hub
+  target: uk-sepa-clearing-network
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 1800
+- source: payments-orchestration-hub
+  target: customer-notifications-service
+  dependency_type: async_event
+  criticality: optional
+- source: payments-orchestration-hub
+  target: secrets-vault-service
+  dependency_type: sync_grpc
+  criticality: degraded_operation
+  timeout_ms: 250
+- source: payments-orchestration-hub
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: payments-event-bus
+  target: payment-clearing-reconciliation
+  dependency_type: async_queue
+  criticality: critical
+- source: payments-event-bus
+  target: reg-reporting-platform
+  dependency_type: async_queue
+  criticality: optional
+- source: payments-event-bus
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: swift-messaging-gateway
+  target: swift-network
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 2200
+- source: swift-messaging-gateway
+  target: payment-clearing-reconciliation
+  dependency_type: async_event
+  criticality: critical
+- source: swift-messaging-gateway
+  target: treasury-liquidity-engine
+  dependency_type: sync_http
+  criticality: degraded_operation
+  timeout_ms: 1200
+- source: swift-messaging-gateway
+  target: secrets-vault-service
+  dependency_type: sync_grpc
+  criticality: degraded_operation
+  timeout_ms: 250
+- source: swift-messaging-gateway
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: uk-sepa-clearing-network
+  target: payment-clearing-reconciliation
+  dependency_type: async_event
+  criticality: optional
+- source: swift-network
+  target: payment-clearing-reconciliation
+  dependency_type: async_event
+  criticality: optional
+- source: treasury-liquidity-engine
+  target: market-data-distribution
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 1000
+- source: treasury-liquidity-engine
+  target: current-accounts-db
+  dependency_type: data_read
+  criticality: critical
+  timeout_ms: 500
+- source: treasury-liquidity-engine
+  target: payment-clearing-reconciliation
+  dependency_type: data_read
+  criticality: degraded_operation
+  timeout_ms: 800
+- source: treasury-liquidity-engine
+  target: enterprise-data-lakehouse
+  dependency_type: data_write
+  criticality: optional
+  timeout_ms: 1500
+- source: treasury-liquidity-engine
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: securities-trading-platform
+  target: market-data-distribution
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 500
+- source: securities-trading-platform
+  target: treasury-liquidity-engine
+  dependency_type: sync_http
+  criticality: degraded_operation
+  timeout_ms: 900
+- source: securities-trading-platform
+  target: customer-master-db
+  dependency_type: data_read
+  criticality: optional
+  timeout_ms: 600
+- source: securities-trading-platform
+  target: secrets-vault-service
+  dependency_type: sync_grpc
+  criticality: degraded_operation
+  timeout_ms: 250
+- source: securities-trading-platform
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: market-data-distribution
+  target: enterprise-data-lakehouse
+  dependency_type: data_write
+  criticality: optional
+  timeout_ms: 1200
+- source: market-data-distribution
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: aml-sanctions-engine
+  target: sanctions-case-management
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 1100
+- source: aml-sanctions-engine
+  target: customer-master-db
+  dependency_type: data_read
+  criticality: critical
+  timeout_ms: 500
+- source: aml-sanctions-engine
+  target: enterprise-data-lakehouse
+  dependency_type: data_read
+  criticality: degraded_operation
+  timeout_ms: 1200
+- source: aml-sanctions-engine
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: fraud-decision-engine
+  target: customer-master-db
+  dependency_type: data_read
+  criticality: critical
+  timeout_ms: 450
+- source: fraud-decision-engine
+  target: enterprise-data-lakehouse
+  dependency_type: data_read
+  criticality: degraded_operation
+  timeout_ms: 1000
+- source: fraud-decision-engine
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: sanctions-case-management
+  target: enterprise-data-lakehouse
+  dependency_type: data_write
+  criticality: optional
+  timeout_ms: 1500
+- source: sanctions-case-management
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: reg-reporting-platform
+  target: enterprise-data-lakehouse
+  dependency_type: data_read
+  criticality: critical
+  timeout_ms: 1600
+- source: reg-reporting-platform
+  target: payment-clearing-reconciliation
+  dependency_type: data_read
+  criticality: critical
+  timeout_ms: 1200
+- source: reg-reporting-platform
+  target: sanctions-case-management
+  dependency_type: data_read
+  criticality: degraded_operation
+  timeout_ms: 1000
+- source: reg-reporting-platform
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: enterprise-data-lakehouse
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: resilience-testing-orchestrator
+  target: observability-platform
+  dependency_type: data_read
+  criticality: critical
+  timeout_ms: 800
+- source: resilience-testing-orchestrator
+  target: core-banking-ledger
+  dependency_type: sync_http
+  criticality: degraded_operation
+  timeout_ms: 1500
+- source: resilience-testing-orchestrator
+  target: payments-orchestration-hub
+  dependency_type: sync_http
+  criticality: degraded_operation
+  timeout_ms: 1500
+- source: resilience-testing-orchestrator
+  target: vendor-risk-assessment-service
+  dependency_type: sync_http
+  criticality: degraded_operation
+  timeout_ms: 1200
+- source: vendor-risk-assessment-service
+  target: enterprise-data-lakehouse
+  dependency_type: data_read
+  criticality: degraded_operation
+  timeout_ms: 1400
+- source: vendor-risk-assessment-service
+  target: reg-reporting-platform
+  dependency_type: sync_http
+  criticality: optional
+  timeout_ms: 1200
+- source: vendor-risk-assessment-service
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: observability-platform
+  target: secrets-vault-service
+  dependency_type: sync_grpc
+  criticality: degraded_operation
+  timeout_ms: 250
+- source: secrets-vault-service
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: ci-cd-platform
+  target: secrets-vault-service
+  dependency_type: sync_grpc
+  criticality: critical
+  timeout_ms: 250
+- source: ci-cd-platform
+  target: observability-platform
+  dependency_type: sync_http
+  criticality: degraded_operation
+  timeout_ms: 1500
+- source: customer-notifications-service
+  target: payments-event-bus
+  dependency_type: async_queue
+  criticality: optional
+- source: customer-notifications-service
+  target: customer-master-db
+  dependency_type: data_read
+  criticality: degraded_operation
+  timeout_ms: 600
+- source: customer-notifications-service
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: session-cache
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: payment-clearing-reconciliation
+  target: enterprise-data-lakehouse
+  dependency_type: data_write
+  criticality: critical
+  timeout_ms: 1500
+- source: payment-clearing-reconciliation
+  target: reg-reporting-platform
+  dependency_type: async_event
+  criticality: degraded_operation
+- source: payment-clearing-reconciliation
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+- source: card-scheme-network
+  target: payment-clearing-reconciliation
+  dependency_type: async_event
+  criticality: optional
+- source: branch-contact-centre-integration
+  target: customer-360-service
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 1200
+- source: branch-contact-centre-integration
+  target: core-banking-ledger
+  dependency_type: sync_http
+  criticality: critical
+  timeout_ms: 1500
+- source: branch-contact-centre-integration
+  target: customer-notifications-service
+  dependency_type: async_event
+  criticality: optional
+- source: branch-contact-centre-integration
+  target: observability-platform
+  dependency_type: async_event
+  criticality: optional
+service_deployments:
+- service: retail-digital-banking-portal
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: retail-digital-banking-portal
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Microsoft Azure
+- service: retail-digital-banking-portal
+  region: EU Central (Frankfurt)
+  deployment_type: edge_cache
+  infrastructure_provider: Google Cloud Platform
+- service: corporate-online-banking
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: corporate-online-banking
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Microsoft Azure
+- service: corporate-online-banking
+  region: EU Central (Frankfurt)
+  deployment_type: edge_cache
+  infrastructure_provider: Google Cloud Platform
+- service: corporate-online-banking
+  region: US East (Virginia)
+  deployment_type: edge_cache
+  infrastructure_provider: Google Cloud Platform
+- service: wealth-mobile-backend
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: wealth-mobile-backend
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Microsoft Azure
+- service: wealth-mobile-backend
+  region: EU Central (Frankfurt)
+  deployment_type: edge_cache
+  infrastructure_provider: Google Cloud Platform
+- service: wealth-mobile-backend
+  region: Asia Pacific (Singapore)
+  deployment_type: edge_cache
+  infrastructure_provider: Google Cloud Platform
+- service: api-gateway
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: api-gateway
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Amazon Web Services
+- service: api-gateway
+  region: EU Central (Frankfurt)
+  deployment_type: edge_cache
+  infrastructure_provider: Google Cloud Platform
+- service: api-gateway
+  region: US East (Virginia)
+  deployment_type: edge_cache
+  infrastructure_provider: Google Cloud Platform
+- service: api-gateway
+  region: Asia Pacific (Singapore)
+  deployment_type: edge_cache
+  infrastructure_provider: Google Cloud Platform
+- service: identity-access-platform
+  region: EU West (Ireland)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: identity-access-platform
+  region: EU Central (Frankfurt)
+  deployment_type: failover
+  infrastructure_provider: Amazon Web Services
+- service: identity-access-platform
+  region: UK South (London)
+  deployment_type: read_replica
+  infrastructure_provider: Microsoft Azure
+- service: customer-360-service
+  region: EU West (Ireland)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: customer-360-service
+  region: EU Central (Frankfurt)
+  deployment_type: failover
+  infrastructure_provider: Google Cloud Platform
+- service: customer-360-service
+  region: UK South (London)
+  deployment_type: read_replica
+  infrastructure_provider: Microsoft Azure
+- service: consent-privacy-service
+  region: EU West (Ireland)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: consent-privacy-service
+  region: UK South (London)
+  deployment_type: failover
+  infrastructure_provider: Microsoft Azure
+- service: customer-master-db
+  region: EU West (Ireland)
+  deployment_type: primary
+  infrastructure_provider: Google Cloud Platform
+- service: customer-master-db
+  region: EU Central (Frankfurt)
+  deployment_type: failover
+  infrastructure_provider: Google Cloud Platform
+- service: customer-master-db
+  region: UK South (London)
+  deployment_type: read_replica
+  infrastructure_provider: Microsoft Azure
+- service: core-banking-ledger
+  region: EU West (Ireland)
+  deployment_type: primary
+  infrastructure_provider: Amazon Web Services
+- service: core-banking-ledger
+  region: EU Central (Frankfurt)
+  deployment_type: failover
+  infrastructure_provider: Google Cloud Platform
+- service: core-banking-ledger
+  region: UK South (London)
+  deployment_type: read_replica
+  infrastructure_provider: Microsoft Azure
+- service: current-accounts-db
+  region: EU West (Ireland)
+  deployment_type: primary
+  infrastructure_provider: Amazon Web Services
+- service: current-accounts-db
+  region: EU Central (Frankfurt)
+  deployment_type: failover
+  infrastructure_provider: Google Cloud Platform
+- service: current-accounts-db
+  region: UK South (London)
+  deployment_type: read_replica
+  infrastructure_provider: Microsoft Azure
+- service: cards-authorisation-switch
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: cards-authorisation-switch
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Google Cloud Platform
+- service: cards-authorisation-switch
+  region: EU Central (Frankfurt)
+  deployment_type: read_replica
+  infrastructure_provider: Microsoft Azure
+- service: cards-ledger-db
+  region: EU West (Ireland)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: cards-ledger-db
+  region: EU Central (Frankfurt)
+  deployment_type: failover
+  infrastructure_provider: Google Cloud Platform
+- service: cards-ledger-db
+  region: UK South (London)
+  deployment_type: read_replica
+  infrastructure_provider: Microsoft Azure
+- service: payments-orchestration-hub
+  region: EU Central (Frankfurt)
+  deployment_type: primary
+  infrastructure_provider: Google Cloud Platform
+- service: payments-orchestration-hub
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Amazon Web Services
+- service: payments-orchestration-hub
+  region: UK South (London)
+  deployment_type: edge_cache
+  infrastructure_provider: Microsoft Azure
+- service: payments-orchestration-hub
+  region: Asia Pacific (Singapore)
+  deployment_type: edge_cache
+  infrastructure_provider: Google Cloud Platform
+- service: payments-event-bus
+  region: EU Central (Frankfurt)
+  deployment_type: primary
+  infrastructure_provider: Google Cloud Platform
+- service: payments-event-bus
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Amazon Web Services
+- service: payments-event-bus
+  region: UK South (London)
+  deployment_type: read_replica
+  infrastructure_provider: Microsoft Azure
+- service: swift-messaging-gateway
+  region: EU Central (Frankfurt)
+  deployment_type: primary
+  infrastructure_provider: Google Cloud Platform
+- service: swift-messaging-gateway
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Google Cloud Platform
+- service: swift-messaging-gateway
+  region: UK South (London)
+  deployment_type: edge_cache
+  infrastructure_provider: Microsoft Azure
+- service: treasury-liquidity-engine
+  region: EU Central (Frankfurt)
+  deployment_type: primary
+  infrastructure_provider: Amazon Web Services
+- service: treasury-liquidity-engine
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Google Cloud Platform
+- service: treasury-liquidity-engine
+  region: UK South (London)
+  deployment_type: read_replica
+  infrastructure_provider: Microsoft Azure
+- service: treasury-liquidity-engine
+  region: US East (Virginia)
+  deployment_type: edge_cache
+  infrastructure_provider: Amazon Web Services
+- service: securities-trading-platform
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: securities-trading-platform
+  region: US East (Virginia)
+  deployment_type: failover
+  infrastructure_provider: Amazon Web Services
+- service: securities-trading-platform
+  region: EU Central (Frankfurt)
+  deployment_type: read_replica
+  infrastructure_provider: Google Cloud Platform
+- service: securities-trading-platform
+  region: Asia Pacific (Singapore)
+  deployment_type: edge_cache
+  infrastructure_provider: Google Cloud Platform
+- service: market-data-distribution
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: market-data-distribution
+  region: US East (Virginia)
+  deployment_type: failover
+  infrastructure_provider: Amazon Web Services
+- service: market-data-distribution
+  region: EU Central (Frankfurt)
+  deployment_type: read_replica
+  infrastructure_provider: Google Cloud Platform
+- service: market-data-distribution
+  region: Asia Pacific (Singapore)
+  deployment_type: edge_cache
+  infrastructure_provider: Google Cloud Platform
+- service: aml-sanctions-engine
+  region: EU Central (Frankfurt)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: aml-sanctions-engine
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Google Cloud Platform
+- service: aml-sanctions-engine
+  region: UK South (London)
+  deployment_type: read_replica
+  infrastructure_provider: Microsoft Azure
+- service: fraud-decision-engine
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Google Cloud Platform
+- service: fraud-decision-engine
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Amazon Web Services
+- service: fraud-decision-engine
+  region: US East (Virginia)
+  deployment_type: edge_cache
+  infrastructure_provider: Google Cloud Platform
+- service: sanctions-case-management
+  region: EU Central (Frankfurt)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: sanctions-case-management
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Microsoft Azure
+- service: reg-reporting-platform
+  region: EU West (Ireland)
+  deployment_type: primary
+  infrastructure_provider: Google Cloud Platform
+- service: reg-reporting-platform
+  region: EU Central (Frankfurt)
+  deployment_type: failover
+  infrastructure_provider: Google Cloud Platform
+- service: reg-reporting-platform
+  region: UK South (London)
+  deployment_type: read_replica
+  infrastructure_provider: Microsoft Azure
+- service: enterprise-data-lakehouse
+  region: EU West (Ireland)
+  deployment_type: primary
+  infrastructure_provider: Google Cloud Platform
+- service: enterprise-data-lakehouse
+  region: EU Central (Frankfurt)
+  deployment_type: failover
+  infrastructure_provider: Google Cloud Platform
+- service: enterprise-data-lakehouse
+  region: UK South (London)
+  deployment_type: read_replica
+  infrastructure_provider: Microsoft Azure
+- service: enterprise-data-lakehouse
+  region: Asia Pacific (Singapore)
+  deployment_type: read_replica
+  infrastructure_provider: Google Cloud Platform
+- service: resilience-testing-orchestrator
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: resilience-testing-orchestrator
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Microsoft Azure
+- service: vendor-risk-assessment-service
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: vendor-risk-assessment-service
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Microsoft Azure
+- service: observability-platform
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: observability-platform
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Amazon Web Services
+- service: observability-platform
+  region: US East (Virginia)
+  deployment_type: read_replica
+  infrastructure_provider: Google Cloud Platform
+- service: secrets-vault-service
+  region: EU West (Ireland)
+  deployment_type: primary
+  infrastructure_provider: Amazon Web Services
+- service: secrets-vault-service
+  region: EU Central (Frankfurt)
+  deployment_type: failover
+  infrastructure_provider: Microsoft Azure
+- service: secrets-vault-service
+  region: UK South (London)
+  deployment_type: read_replica
+  infrastructure_provider: Amazon Web Services
+- service: ci-cd-platform
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: ci-cd-platform
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Microsoft Azure
+- service: customer-notifications-service
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: customer-notifications-service
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Google Cloud Platform
+- service: session-cache
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Amazon Web Services
+- service: session-cache
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Amazon Web Services
+- service: session-cache
+  region: EU Central (Frankfurt)
+  deployment_type: read_replica
+  infrastructure_provider: Google Cloud Platform
+- service: payment-clearing-reconciliation
+  region: EU Central (Frankfurt)
+  deployment_type: primary
+  infrastructure_provider: Google Cloud Platform
+- service: payment-clearing-reconciliation
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Amazon Web Services
+- service: payment-clearing-reconciliation
+  region: UK South (London)
+  deployment_type: read_replica
+  infrastructure_provider: Microsoft Azure
+- service: branch-contact-centre-integration
+  region: UK South (London)
+  deployment_type: primary
+  infrastructure_provider: Microsoft Azure
+- service: branch-contact-centre-integration
+  region: EU West (Ireland)
+  deployment_type: failover
+  infrastructure_provider: Google Cloud Platform
+vendor_dependencies:
+- service: retail-digital-banking-portal
+  vendor: Microsoft Azure
+  dependency_type: cloud_compute
+  criticality: high
+- service: corporate-online-banking
+  vendor: Microsoft Azure
+  dependency_type: cloud_compute
+  criticality: high
+- service: wealth-mobile-backend
+  vendor: Microsoft Azure
+  dependency_type: cloud_compute
+  criticality: high
+- service: api-gateway
+  vendor: Microsoft Azure
+  dependency_type: cloud_compute
+  criticality: critical
+  fallback_vendor: Amazon Web Services
+- service: identity-access-platform
+  vendor: SailPoint
+  dependency_type: identity_governance
+  criticality: critical
+  fallback_vendor: Microsoft Azure
+- service: identity-access-platform
+  vendor: Microsoft Azure
+  dependency_type: cloud_compute
+  criticality: critical
+  fallback_vendor: Amazon Web Services
+- service: customer-360-service
+  vendor: Microsoft Azure
+  dependency_type: cloud_compute
+  criticality: high
+- service: consent-privacy-service
+  vendor: ServiceNow
+  dependency_type: privacy_workflow
+  criticality: medium
+- service: customer-master-db
+  vendor: Google Cloud Platform
+  dependency_type: cloud_compute
+  criticality: high
+- service: core-banking-ledger
+  vendor: FIS Global
+  dependency_type: core_banking_platform
+  criticality: critical
+  fallback_vendor: Temenos
+- service: core-banking-ledger
+  vendor: Amazon Web Services
+  dependency_type: cloud_compute
+  criticality: critical
+  fallback_vendor: Google Cloud Platform
+- service: current-accounts-db
+  vendor: Amazon Web Services
+  dependency_type: cloud_compute
+  criticality: critical
+  fallback_vendor: Google Cloud Platform
+- service: cards-authorisation-switch
+  vendor: Microsoft Azure
+  dependency_type: cloud_compute
+  criticality: critical
+  fallback_vendor: Google Cloud Platform
+- service: cards-ledger-db
+  vendor: Microsoft Azure
+  dependency_type: cloud_compute
+  criticality: high
+- service: payments-orchestration-hub
+  vendor: Google Cloud Platform
+  dependency_type: cloud_compute
+  criticality: critical
+  fallback_vendor: Amazon Web Services
+- service: payments-event-bus
+  vendor: Google Cloud Platform
+  dependency_type: cloud_messaging
+  criticality: high
+- service: swift-messaging-gateway
+  vendor: Bottomline
+  dependency_type: swift_service_bureau
+  criticality: critical
+  fallback_vendor: Finastra
+- service: swift-messaging-gateway
+  vendor: Google Cloud Platform
+  dependency_type: cloud_compute
+  criticality: critical
+  fallback_vendor: Amazon Web Services
+- service: treasury-liquidity-engine
+  vendor: Murex
+  dependency_type: treasury_platform
+  criticality: critical
+  fallback_vendor: Adenza
+- service: securities-trading-platform
+  vendor: Murex
+  dependency_type: trading_platform
+  criticality: high
+- service: market-data-distribution
+  vendor: Bloomberg
+  dependency_type: market_data_feed
+  criticality: critical
+  fallback_vendor: LSEG Workspace
+- service: aml-sanctions-engine
+  vendor: NICE Actimize
+  dependency_type: aml_sanctions_platform
+  criticality: critical
+  fallback_vendor: Quantexa
+- service: fraud-decision-engine
+  vendor: Quantexa
+  dependency_type: fraud_analytics
+  criticality: critical
+  fallback_vendor: NICE Actimize
+- service: sanctions-case-management
+  vendor: ServiceNow
+  dependency_type: case_management
+  criticality: medium
+- service: reg-reporting-platform
+  vendor: Databricks
+  dependency_type: reg_reporting_compute
+  criticality: high
+- service: enterprise-data-lakehouse
+  vendor: Snowflake
+  dependency_type: data_platform
+  criticality: high
+- service: enterprise-data-lakehouse
+  vendor: Google Cloud Platform
+  dependency_type: cloud_compute
+  criticality: high
+- service: resilience-testing-orchestrator
+  vendor: ServiceNow
+  dependency_type: workflow_orchestration
+  criticality: medium
+- service: vendor-risk-assessment-service
+  vendor: ServiceNow
+  dependency_type: third_party_risk
+  criticality: high
+- service: observability-platform
+  vendor: Datadog
+  dependency_type: observability
+  criticality: high
+- service: secrets-vault-service
+  vendor: Amazon Web Services
+  dependency_type: secret_storage
+  criticality: critical
+  fallback_vendor: Microsoft Azure
+- service: ci-cd-platform
+  vendor: Microsoft Azure
+  dependency_type: delivery_platform
+  criticality: medium
+- service: customer-notifications-service
+  vendor: Microsoft Azure
+  dependency_type: cloud_compute
+  criticality: medium
+- service: session-cache
+  vendor: Amazon Web Services
+  dependency_type: cloud_cache
+  criticality: high
+- service: payment-clearing-reconciliation
+  vendor: Google Cloud Platform
+  dependency_type: cloud_compute
+  criticality: high
+- service: branch-contact-centre-integration
+  vendor: SAP
+  dependency_type: crm_integration
+  criticality: medium
+service_ownerships:
+- service: retail-digital-banking-portal
+  team: Retail Digital Banking
+  ownership_type: primary
+- service: retail-digital-banking-portal
+  team: SRE & Observability
+  ownership_type: on_call
+- service: corporate-online-banking
+  team: Corporate & Cash Channels
+  ownership_type: primary
+- service: corporate-online-banking
+  team: SRE & Observability
+  ownership_type: on_call
+- service: wealth-mobile-backend
+  team: Wealth Platforms
+  ownership_type: primary
+- service: wealth-mobile-backend
+  team: SRE & Observability
+  ownership_type: on_call
+- service: api-gateway
+  team: Retail Digital Banking
+  ownership_type: primary
+- service: api-gateway
+  team: SRE & Observability
+  ownership_type: on_call
+- service: identity-access-platform
+  team: Cyber Security Engineering
+  ownership_type: primary
+- service: identity-access-platform
+  team: SRE & Observability
+  ownership_type: on_call
+- service: customer-360-service
+  team: Customer Data & CRM
+  ownership_type: primary
+- service: customer-360-service
+  team: SRE & Observability
+  ownership_type: on_call
+- service: consent-privacy-service
+  team: Cyber Security Engineering
+  ownership_type: primary
+- service: consent-privacy-service
+  team: SRE & Observability
+  ownership_type: on_call
+- service: customer-master-db
+  team: Customer Data & CRM
+  ownership_type: primary
+- service: customer-master-db
+  team: SRE & Observability
+  ownership_type: on_call
+- service: core-banking-ledger
+  team: Core Banking Engineering
+  ownership_type: primary
+- service: core-banking-ledger
+  team: SRE & Observability
+  ownership_type: on_call
+- service: current-accounts-db
+  team: Core Banking Engineering
+  ownership_type: primary
+- service: current-accounts-db
+  team: SRE & Observability
+  ownership_type: on_call
+- service: cards-authorisation-switch
+  team: Cards & Consumer Finance
+  ownership_type: primary
+- service: cards-authorisation-switch
+  team: SRE & Observability
+  ownership_type: on_call
+- service: cards-ledger-db
+  team: Cards & Consumer Finance
+  ownership_type: primary
+- service: cards-ledger-db
+  team: SRE & Observability
+  ownership_type: on_call
+- service: payments-orchestration-hub
+  team: Payments Engineering
+  ownership_type: primary
+- service: payments-orchestration-hub
+  team: SRE & Observability
+  ownership_type: on_call
+- service: payments-event-bus
+  team: Payments Engineering
+  ownership_type: primary
+- service: payments-event-bus
+  team: SRE & Observability
+  ownership_type: on_call
+- service: swift-messaging-gateway
+  team: Payments Engineering
+  ownership_type: primary
+- service: swift-messaging-gateway
+  team: SRE & Observability
+  ownership_type: on_call
+- service: uk-sepa-clearing-network
+  team: Payments Engineering
+  ownership_type: primary
+- service: swift-network
+  team: Payments Engineering
+  ownership_type: primary
+- service: treasury-liquidity-engine
+  team: Treasury Platforms
+  ownership_type: primary
+- service: treasury-liquidity-engine
+  team: SRE & Observability
+  ownership_type: on_call
+- service: securities-trading-platform
+  team: Markets Technology
+  ownership_type: primary
+- service: securities-trading-platform
+  team: SRE & Observability
+  ownership_type: on_call
+- service: market-data-distribution
+  team: Markets Technology
+  ownership_type: primary
+- service: market-data-distribution
+  team: SRE & Observability
+  ownership_type: on_call
+- service: aml-sanctions-engine
+  team: Financial Crime Technology
+  ownership_type: primary
+- service: aml-sanctions-engine
+  team: SRE & Observability
+  ownership_type: on_call
+- service: fraud-decision-engine
+  team: Financial Crime Technology
+  ownership_type: primary
+- service: fraud-decision-engine
+  team: SRE & Observability
+  ownership_type: on_call
+- service: sanctions-case-management
+  team: Financial Crime Technology
+  ownership_type: primary
+- service: sanctions-case-management
+  team: SRE & Observability
+  ownership_type: on_call
+- service: reg-reporting-platform
+  team: Regulatory Data & Reporting
+  ownership_type: primary
+- service: reg-reporting-platform
+  team: SRE & Observability
+  ownership_type: on_call
+- service: enterprise-data-lakehouse
+  team: Regulatory Data & Reporting
+  ownership_type: primary
+- service: enterprise-data-lakehouse
+  team: SRE & Observability
+  ownership_type: on_call
+- service: resilience-testing-orchestrator
+  team: SRE & Observability
+  ownership_type: primary
+- service: resilience-testing-orchestrator
+  team: SRE & Observability
+  ownership_type: on_call
+- service: vendor-risk-assessment-service
+  team: Vendor & Resilience Office
+  ownership_type: primary
+- service: vendor-risk-assessment-service
+  team: SRE & Observability
+  ownership_type: on_call
+- service: observability-platform
+  team: SRE & Observability
+  ownership_type: primary
+- service: observability-platform
+  team: SRE & Observability
+  ownership_type: on_call
+- service: secrets-vault-service
+  team: Cyber Security Engineering
+  ownership_type: primary
+- service: secrets-vault-service
+  team: SRE & Observability
+  ownership_type: on_call
+- service: ci-cd-platform
+  team: Platform Engineering
+  ownership_type: primary
+- service: ci-cd-platform
+  team: SRE & Observability
+  ownership_type: on_call
+- service: customer-notifications-service
+  team: Customer Data & CRM
+  ownership_type: primary
+- service: customer-notifications-service
+  team: SRE & Observability
+  ownership_type: on_call
+- service: session-cache
+  team: Platform Engineering
+  ownership_type: primary
+- service: session-cache
+  team: SRE & Observability
+  ownership_type: on_call
+- service: payment-clearing-reconciliation
+  team: Payments Engineering
+  ownership_type: primary
+- service: payment-clearing-reconciliation
+  team: SRE & Observability
+  ownership_type: on_call
+- service: card-scheme-network
+  team: Payments Engineering
+  ownership_type: primary
+- service: branch-contact-centre-integration
+  team: Corporate & Cash Channels
+  ownership_type: primary
+- service: branch-contact-centre-integration
+  team: SRE & Observability
+  ownership_type: on_call
+- service: payments-orchestration-hub
+  team: Vendor & Resilience Office
+  ownership_type: supporting
+- service: swift-messaging-gateway
+  team: Vendor & Resilience Office
+  ownership_type: supporting
+- service: enterprise-data-lakehouse
+  team: Cyber Security Engineering
+  ownership_type: supporting
+- service: reg-reporting-platform
+  team: Vendor & Resilience Office
+  ownership_type: supporting
+- service: identity-access-platform
+  team: Vendor & Resilience Office
+  ownership_type: supporting
+service_domains:
+- service: retail-digital-banking-portal
+  domain: Customer Channels
+  is_primary: true
+- service: corporate-online-banking
+  domain: Customer Channels
+  is_primary: true
+- service: wealth-mobile-backend
+  domain: Customer Channels
+  is_primary: true
+- service: api-gateway
+  domain: Customer Channels
+  is_primary: true
+- service: identity-access-platform
+  domain: Cyber Security
+  is_primary: true
+- service: customer-360-service
+  domain: Customer Channels
+  is_primary: true
+- service: consent-privacy-service
+  domain: Cyber Security
+  is_primary: true
+- service: customer-master-db
+  domain: Customer Channels
+  is_primary: true
+- service: core-banking-ledger
+  domain: Core Banking & Cards
+  is_primary: true
+- service: current-accounts-db
+  domain: Core Banking & Cards
+  is_primary: true
+- service: cards-authorisation-switch
+  domain: Core Banking & Cards
+  is_primary: true
+- service: cards-ledger-db
+  domain: Core Banking & Cards
+  is_primary: true
+- service: payments-orchestration-hub
+  domain: Payments & Treasury
+  is_primary: true
+- service: payments-event-bus
+  domain: Payments & Treasury
+  is_primary: true
+- service: swift-messaging-gateway
+  domain: Payments & Treasury
+  is_primary: true
+- service: uk-sepa-clearing-network
+  domain: Payments & Treasury
+  is_primary: true
+- service: swift-network
+  domain: Payments & Treasury
+  is_primary: true
+- service: treasury-liquidity-engine
+  domain: Payments & Treasury
+  is_primary: true
+- service: securities-trading-platform
+  domain: Markets & Risk
+  is_primary: true
+- service: market-data-distribution
+  domain: Markets & Risk
+  is_primary: true
+- service: aml-sanctions-engine
+  domain: Markets & Risk
+  is_primary: true
+- service: fraud-decision-engine
+  domain: Markets & Risk
+  is_primary: true
+- service: sanctions-case-management
+  domain: Markets & Risk
+  is_primary: true
+- service: reg-reporting-platform
+  domain: Data & Regulatory Reporting
+  is_primary: true
+- service: enterprise-data-lakehouse
+  domain: Data & Regulatory Reporting
+  is_primary: true
+- service: resilience-testing-orchestrator
+  domain: Platform Engineering
+  is_primary: true
+- service: vendor-risk-assessment-service
+  domain: Cyber Security
+  is_primary: true
+- service: observability-platform
+  domain: Platform Engineering
+  is_primary: true
+- service: secrets-vault-service
+  domain: Cyber Security
+  is_primary: true
+- service: ci-cd-platform
+  domain: Platform Engineering
+  is_primary: true
+- service: customer-notifications-service
+  domain: Customer Channels
+  is_primary: true
+- service: session-cache
+  domain: Platform Engineering
+  is_primary: true
+- service: payment-clearing-reconciliation
+  domain: Payments & Treasury
+  is_primary: true
+- service: card-scheme-network
+  domain: Payments & Treasury
+  is_primary: true
+- service: branch-contact-centre-integration
+  domain: Customer Channels
+  is_primary: true
+- service: api-gateway
+  domain: Platform Engineering
+  is_primary: false
+- service: identity-access-platform
+  domain: Customer Channels
+  is_primary: false
+- service: customer-360-service
+  domain: Data & Regulatory Reporting
+  is_primary: false
+- service: payments-orchestration-hub
+  domain: Markets & Risk
+  is_primary: false
+- service: payments-orchestration-hub
+  domain: Data & Regulatory Reporting
+  is_primary: false
+- service: swift-messaging-gateway
+  domain: Cyber Security
+  is_primary: false
+- service: enterprise-data-lakehouse
+  domain: Markets & Risk
+  is_primary: false
+- service: enterprise-data-lakehouse
+  domain: Customer Channels
+  is_primary: false
+- service: observability-platform
+  domain: Cyber Security
+  is_primary: false
+- service: vendor-risk-assessment-service
+  domain: Data & Regulatory Reporting
+  is_primary: false
+- service: secrets-vault-service
+  domain: Platform Engineering
+  is_primary: false
+- service: reg-reporting-platform
+  domain: Cyber Security
+  is_primary: false
+data_flows:
+- source_service: customer-360-service
+  target_service: enterprise-data-lakehouse
+  source_region: EU West (Ireland)
+  target_region: UK South (London)
+  data_classification: confidential
+  confidentiality: confidential
+  data_category: personal
+  encryption_in_transit: true
+  encryption_at_rest: true
+  encryption: in_transit
+  regulatory_constraints:
+  - GDPR
+  - DORA
+  - UK_OR
+  - NIS2
+  transfer_mechanism: ADEQUACY
+  has_sccs: false
+  has_bcr: false
+  adequacy_decision: true
+  has_dpa: true
+  erasure_mechanism: crypto_erase
+  erasure_days: 30
+  is_cross_border: true
+  volume_gb_per_day: 95.0
+- source_service: corporate-online-banking
+  target_service: enterprise-data-lakehouse
+  source_region: UK South (London)
+  target_region: EU Central (Frankfurt)
+  data_classification: confidential
+  confidentiality: confidential
+  data_category: personal
+  encryption_in_transit: true
+  encryption_at_rest: true
+  encryption: in_transit
+  regulatory_constraints:
+  - GDPR
+  - UK_OR
+  - DORA
+  transfer_mechanism: ADEQUACY
+  has_sccs: false
+  has_bcr: false
+  adequacy_decision: true
+  has_dpa: true
+  erasure_mechanism: anonymization
+  erasure_days: 30
+  is_cross_border: true
+  volume_gb_per_day: 42.0
+- source_service: payments-orchestration-hub
+  target_service: payment-clearing-reconciliation
+  source_region: EU Central (Frankfurt)
+  target_region: Asia Pacific (Singapore)
+  data_classification: restricted
+  confidentiality: confidential
+  data_category: transaction
+  encryption_in_transit: true
+  encryption_at_rest: true
+  encryption: in_transit
+  regulatory_constraints:
+  - DORA
+  - MAS_TRM
+  - HKMA_OR2
+  transfer_mechanism: SCC
+  has_sccs: true
+  has_bcr: false
+  adequacy_decision: false
+  has_dpa: true
+  erasure_mechanism: physical_delete
+  erasure_days: 30
+  is_cross_border: true
+  volume_gb_per_day: 18.0
+- source_service: securities-trading-platform
+  target_service: enterprise-data-lakehouse
+  source_region: UK South (London)
+  target_region: US East (Virginia)
+  data_classification: confidential
+  confidentiality: confidential
+  data_category: transaction
+  encryption_in_transit: true
+  encryption_at_rest: true
+  encryption: in_transit
+  regulatory_constraints:
+  - UK_OR
+  - NYDFS_500
+  transfer_mechanism: ADEQUACY
+  has_sccs: false
+  has_bcr: false
+  adequacy_decision: true
+  has_dpa: true
+  erasure_mechanism: anonymization
+  erasure_days: 45
+  is_cross_border: true
+  volume_gb_per_day: 60.0
+- source_service: aml-sanctions-engine
+  target_service: sanctions-case-management
+  source_region: EU Central (Frankfurt)
+  target_region: UK South (London)
+  data_classification: confidential
+  confidentiality: confidential
+  data_category: personal
+  encryption_in_transit: true
+  encryption_at_rest: true
+  encryption: in_transit
+  regulatory_constraints:
+  - GDPR
+  - DORA
+  - UK_OR
+  - NIS2
+  transfer_mechanism: ADEQUACY
+  has_sccs: false
+  has_bcr: false
+  adequacy_decision: true
+  has_dpa: true
+  erasure_mechanism: crypto_erase
+  erasure_days: 30
+  is_cross_border: true
+  volume_gb_per_day: 14.0
+- source_service: fraud-decision-engine
+  target_service: enterprise-data-lakehouse
+  source_region: UK South (London)
+  target_region: Asia Pacific (Singapore)
+  data_classification: confidential
+  confidentiality: confidential
+  data_category: personal
+  encryption_in_transit: true
+  encryption_at_rest: true
+  encryption: in_transit
+  regulatory_constraints:
+  - GDPR
+  - UK_OR
+  - MAS_TRM
+  transfer_mechanism: SCC
+  has_sccs: true
+  has_bcr: false
+  adequacy_decision: false
+  has_dpa: true
+  erasure_mechanism: crypto_erase
+  erasure_days: 30
+  is_cross_border: true
+  volume_gb_per_day: 36.0
+team_locations:
+- team: Retail Digital Banking
+  region: UK South (London)
+  headcount_in_region: 520
+  skills_in_region:
+  - web
+  - mobile
+  - api
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: true
+- team: Retail Digital Banking
+  region: Asia Pacific (Singapore)
+  headcount_in_region: 110
+  skills_in_region:
+  - mobile
+  - sre
+  time_zone: Asia/Singapore
+  office_type: office
+  can_operate_remotely: true
+- team: Corporate & Cash Channels
+  region: UK South (London)
+  headcount_in_region: 340
+  skills_in_region:
+  - corporate_channels
+  - integration
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: true
+- team: Corporate & Cash Channels
+  region: US East (Virginia)
+  headcount_in_region: 150
+  skills_in_region:
+  - cash_management
+  - support
+  time_zone: America/New_York
+  office_type: office
+  can_operate_remotely: false
+- team: Wealth Platforms
+  region: UK South (London)
+  headcount_in_region: 210
+  skills_in_region:
+  - wealth
+  - mobile
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: true
+- team: Wealth Platforms
+  region: Asia Pacific (Singapore)
+  headcount_in_region: 90
+  skills_in_region:
+  - advisor_tools
+  - mobile
+  time_zone: Asia/Singapore
+  office_type: office
+  can_operate_remotely: true
+- team: Customer Data & CRM
+  region: UK South (London)
+  headcount_in_region: 260
+  skills_in_region:
+  - crm
+  - master_data
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: true
+- team: Customer Data & CRM
+  region: EU West (Ireland)
+  headcount_in_region: 130
+  skills_in_region:
+  - privacy
+  - data_modeling
+  time_zone: Europe/Dublin
+  office_type: office
+  can_operate_remotely: true
+- team: Core Banking Engineering
+  region: UK South (London)
+  headcount_in_region: 430
+  skills_in_region:
+  - core_banking
+  - db
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: false
+- team: Core Banking Engineering
+  region: EU Central (Frankfurt)
+  headcount_in_region: 240
+  skills_in_region:
+  - ledger
+  - resilience
+  time_zone: Europe/Berlin
+  office_type: office
+  can_operate_remotely: true
+- team: Cards & Consumer Finance
+  region: UK South (London)
+  headcount_in_region: 280
+  skills_in_region:
+  - cards
+  - payments
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: true
+- team: Cards & Consumer Finance
+  region: EU West (Ireland)
+  headcount_in_region: 120
+  skills_in_region:
+  - settlement
+  - pci
+  time_zone: Europe/Dublin
+  office_type: office
+  can_operate_remotely: true
+- team: Payments Engineering
+  region: UK South (London)
+  headcount_in_region: 360
+  skills_in_region:
+  - payments
+  - swift
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: false
+- team: Payments Engineering
+  region: EU Central (Frankfurt)
+  headcount_in_region: 280
+  skills_in_region:
+  - sepa
+  - liquidity
+  time_zone: Europe/Berlin
+  office_type: office
+  can_operate_remotely: true
+- team: Payments Engineering
+  region: Asia Pacific (Singapore)
+  headcount_in_region: 160
+  skills_in_region:
+  - cross_border
+  - support
+  time_zone: Asia/Singapore
+  office_type: office
+  can_operate_remotely: true
+- team: Treasury Platforms
+  region: UK South (London)
+  headcount_in_region: 170
+  skills_in_region:
+  - liquidity
+  - cash
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: false
+- team: Treasury Platforms
+  region: US East (Virginia)
+  headcount_in_region: 140
+  skills_in_region:
+  - markets_treasury
+  time_zone: America/New_York
+  office_type: office
+  can_operate_remotely: false
+- team: Markets Technology
+  region: UK South (London)
+  headcount_in_region: 280
+  skills_in_region:
+  - trading
+  - market_data
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: false
+- team: Markets Technology
+  region: US East (Virginia)
+  headcount_in_region: 220
+  skills_in_region:
+  - equities
+  - fixed_income
+  time_zone: America/New_York
+  office_type: office
+  can_operate_remotely: false
+- team: Markets Technology
+  region: Asia Pacific (Singapore)
+  headcount_in_region: 120
+  skills_in_region:
+  - fx
+  - support
+  time_zone: Asia/Singapore
+  office_type: office
+  can_operate_remotely: false
+- team: Financial Crime Technology
+  region: UK South (London)
+  headcount_in_region: 230
+  skills_in_region:
+  - aml
+  - fraud
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: true
+- team: Financial Crime Technology
+  region: EU Central (Frankfurt)
+  headcount_in_region: 150
+  skills_in_region:
+  - sanctions
+  - screening
+  time_zone: Europe/Berlin
+  office_type: office
+  can_operate_remotely: true
+- team: Regulatory Data & Reporting
+  region: UK South (London)
+  headcount_in_region: 200
+  skills_in_region:
+  - reg_reporting
+  - data
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: true
+- team: Regulatory Data & Reporting
+  region: EU West (Ireland)
+  headcount_in_region: 140
+  skills_in_region:
+  - lakehouse
+  - governance
+  time_zone: Europe/Dublin
+  office_type: office
+  can_operate_remotely: true
+- team: Regulatory Data & Reporting
+  region: EU Central (Frankfurt)
+  headcount_in_region: 160
+  skills_in_region:
+  - supervisory_reporting
+  time_zone: Europe/Berlin
+  office_type: office
+  can_operate_remotely: true
+- team: Platform Engineering
+  region: UK South (London)
+  headcount_in_region: 320
+  skills_in_region:
+  - kubernetes
+  - ci_cd
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: true
+- team: Platform Engineering
+  region: EU West (Ireland)
+  headcount_in_region: 210
+  skills_in_region:
+  - cloud
+  - runtime
+  time_zone: Europe/Dublin
+  office_type: office
+  can_operate_remotely: true
+- team: Platform Engineering
+  region: US East (Virginia)
+  headcount_in_region: 120
+  skills_in_region:
+  - cloud
+  - platform_ops
+  time_zone: America/New_York
+  office_type: remote
+  can_operate_remotely: true
+- team: SRE & Observability
+  region: UK South (London)
+  headcount_in_region: 180
+  skills_in_region:
+  - incident_command
+  - sre
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: true
+- team: SRE & Observability
+  region: US East (Virginia)
+  headcount_in_region: 100
+  skills_in_region:
+  - follow_the_sun
+  - ops
+  time_zone: America/New_York
+  office_type: office
+  can_operate_remotely: true
+- team: SRE & Observability
+  region: Asia Pacific (Singapore)
+  headcount_in_region: 100
+  skills_in_region:
+  - follow_the_sun
+  - ops
+  time_zone: Asia/Singapore
+  office_type: office
+  can_operate_remotely: true
+- team: Cyber Security Engineering
+  region: UK South (London)
+  headcount_in_region: 240
+  skills_in_region:
+  - identity
+  - secrets
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: true
+- team: Cyber Security Engineering
+  region: EU Central (Frankfurt)
+  headcount_in_region: 120
+  skills_in_region:
+  - security_architecture
+  time_zone: Europe/Berlin
+  office_type: office
+  can_operate_remotely: true
+- team: Cyber Security Engineering
+  region: Asia Pacific (Singapore)
+  headcount_in_region: 80
+  skills_in_region:
+  - security_ops
+  time_zone: Asia/Singapore
+  office_type: office
+  can_operate_remotely: true
+- team: Vendor & Resilience Office
+  region: UK South (London)
+  headcount_in_region: 120
+  skills_in_region:
+  - third_party_risk
+  - resilience
+  time_zone: Europe/London
+  office_type: office
+  can_operate_remotely: true
+- team: Vendor & Resilience Office
+  region: EU Central (Frankfurt)
+  headcount_in_region: 70
+  skills_in_region:
+  - dora
+  - outsourcing
+  time_zone: Europe/Berlin
+  office_type: remote
+  can_operate_remotely: true

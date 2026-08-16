@@ -1,0 +1,227 @@
+# Britannia Phase 2 — experiment configuration
+#
+# Every constant that the topology -> SynthWorld adapter uses lives here, so the
+# transformation is auditable rather than buried in code. Nothing in this file is
+# derived from SynthWorld evaluator artifacts.
+#
+# ZONE: 01-source (source topology + experiment configuration)
+
+experiment:
+  id: britannia-topaz-phase2
+  phase: 2
+  description: >-
+    Compile britannia_global_bank_topology.yaml into a deterministic SynthWorld
+    enterprise identity/access universe, project it into Aserto Topaz, exercise
+    Topaz authorization decisions against a real Rego policy, and score the
+    decisions with SynthWorld's enterprise directory-RBAC benchmark scorer.
+
+source:
+  topology: britannia_global_bank_topology.yaml
+  topology_sha256: 29ea8dd155ceed277eedf3f7261f0ba6844ff5a3e6c5a9c70164ae78b80871d1
+
+synthworld:
+  package: idcognito-synthworld
+  version: "0.15.0"
+  wheel_sha256: f1b17f8254521d307e38cfc3a44d00844308dd36c7972da00b816b92e257ee60
+  sdist_sha256: c278758e47c4545b46a9f234dab53163a0899440fd55684805104087b8ca9d8c
+
+determinism:
+  # Single seed governs SynthWorld compilation. Adapter output is a pure function
+  # of (topology bytes, this config), independent of the seed.
+  seed: 20260816
+  # Namespace salt for SynthWorld's stable identifier derivation. The released
+  # importer requires a 64-character lowercase hex string (diagnostic code
+  # `id_namespace_salt_invalid`; the constraint is not stated in the scaffold
+  # template or in --help). The adapter derives it as
+  # sha256(id_namespace_salt_phrase) so the value is reproducible from a
+  # human-readable phrase rather than being an opaque constant.
+  id_namespace_salt_phrase: britannia-phase2-fixed-salt
+  id_namespace_salt: 1c239a3d60377f85dd3efe9c9a50eb0f2cba93f9f97cfd89c272b2ac0f2bf496
+  blueprint_key: britannia-global-bank
+  # Recorded from three independent builds that produced 23 byte-identical files.
+  # Stage 80 asserts these, so any accidental non-determinism fails the run loudly
+  # instead of silently changing the benchmark.
+  expected_digests:
+    identity_access_universe: a4c7bcfb74956b88a55dade06fff0869bd30583826732315aadcdf16a066a7c6
+    evaluation_corpus: 7c582bc94d117350c539d86b9a013b46d7628f1bf091a921a52457d79c483816
+
+# ---------------------------------------------------------------------------
+# Tenancy: derived from organisation.metadata.legal_entity_footprint.
+# A universal bank's legal entities are genuine authorization tenants: the UK
+# ring-fenced bank is required by regulation to be separable from the EEA and
+# US entities. Cross-tenant denial therefore models ring-fence enforcement.
+# ---------------------------------------------------------------------------
+tenancy:
+  # organisation.regions -> legal entity key. Every region in the topology must
+  # appear here; the adapter fails closed if one does not.
+  region_to_tenant:
+    "UK South (London)": uk
+    "EU West (Ireland)": europe
+    "EU Central (Frankfurt)": europe
+    "US East (Virginia)": americas
+    "Asia Pacific (Singapore)": apac-mea
+  # Tenant that holds third-party supplier principals. Derived from vendors[].
+  vendor_tenant: vendor-external
+
+# ---------------------------------------------------------------------------
+# Population scaling.
+# team_locations[].headcount_in_region sums to 7150 real staff. Compiling one
+# SynthWorld principal per head yields a directory too large to load into Topaz
+# and score inside a single reproducible run. Counts are divided by this factor
+# (ceiling, minimum 1). The original headcount is preserved verbatim as
+# experiment-owned metadata in the mapping report, and setting the divisor to 1
+# reproduces the full-scale world.
+# ---------------------------------------------------------------------------
+scaling:
+  population_divisor: 50
+  min_population_count: 1
+  # Workload populations: one per service, count = number of service_deployments
+  # for that service (real, unscaled - deployments are already small).
+  workload_population_from_deployments: true
+  # Supplier populations: one per data_processor vendor, count = number of
+  # vendor_dependencies rows naming that vendor. Derived, not present in source.
+  supplier_population_from_vendor_dependencies: true
+
+# ---------------------------------------------------------------------------
+# Unit hierarchy.
+# domains[].parent_domain is present in the schema but null for all 7 records,
+# so no domain hierarchy can be derived from the source. The unit tree is
+# therefore two levels deep, not three.
+# ---------------------------------------------------------------------------
+units:
+  domain_unit_kind: division
+  team_unit_kind: team
+  # A team's parent division = the domain that is primary for the plurality of
+  # services the team owns with ownership_type=primary. Ties broken by domain
+  # name ascending (deterministic).
+  team_parent_rule: plurality_primary_service_domain
+  vendor_unit_kind: department
+
+# ---------------------------------------------------------------------------
+# Resource sets: one per service.
+# ---------------------------------------------------------------------------
+resources:
+  # services[].service_type -> SynthWorld TargetKind
+  # {application, api, tool, data_store, environment}
+  service_type_to_target_kind:
+    api: api            # exact
+    database: data_store # exact
+    cache: data_store    # approximated: a cache is a data store with no durability contract
+    queue: api           # approximated: TargetKind has no messaging construct
+    worker: application  # approximated: a background worker is an application
+    external: application # approximated: an external system surfaced as an application
+  # Action ladder offered by every resource set, gated later by role grants and
+  # ABAC action-class predicates. Maps onto SynthWorld ActionClass
+  # {read, write, execute, admin}.
+  actions:
+    - read
+    - write
+    - invoke
+    - deploy
+  action_to_action_class:
+    read: read
+    write: write
+    invoke: execute
+    deploy: admin
+  # services[].data_classification -> SynthWorld InformationClassification
+  # {public, internal, confidential, restricted}
+  data_classification_to_information_classification:
+    internal: internal        # exact
+    confidential: confidential # exact
+    restricted: restricted     # exact
+
+# ---------------------------------------------------------------------------
+# Roles: derived from service_ownerships[].ownership_type.
+# The topology's three ownership types form a natural seniority ladder.
+# ---------------------------------------------------------------------------
+roles:
+  ownership_type_to_role:
+    primary: service-owner
+    on_call: service-operator
+    supporting: service-contributor
+  # senior -> junior. A service-owner inherits everything an operator can do.
+  hierarchy:
+    - senior: service-owner
+      junior: service-operator
+    - senior: service-operator
+      junior: service-contributor
+  # role -> actions granted on every resource set the role is scoped to.
+  # This is the scope ladder that the "authority exceeds delegated scope" case
+  # tests: a contributor requesting deploy exceeds its grant.
+  grants:
+    service-owner: [read, write, invoke, deploy]
+    # on_call responders hold `deploy` in the directory. This is a real
+    # operational pattern - incident response requires the ability to roll a
+    # service forward or back - and it is the source of the scope-exceeded case:
+    # an on-call engineer for service S is not in S's owning unit, so the ABAC
+    # scope guard denies admin-class actions even though RBAC derives an allow.
+    service-operator: [read, write, invoke, deploy]
+    service-contributor: [read]
+  # Line-of-defence roles from organisation.metadata.lines_of_defence.
+  # Second/third line get read-only oversight across their own tenant.
+  oversight_role: risk-oversight
+  oversight_grants: [read]
+
+# ---------------------------------------------------------------------------
+# Accounts (iam_universe_extension).
+# ---------------------------------------------------------------------------
+accounts:
+  workforce_accounts_per_subject: 1
+  # service_dependencies[] become workload-account access: the caller service's
+  # workload account gets `invoke` on the callee service.
+  workload_from_service_dependencies: true
+  # A small number of agent accounts, allocated against services whose vendor
+  # dependency type is ai_ml. Used for the agent/runtime binding negative case.
+  agent_account_vendor_types: [ai_ml]
+
+# ---------------------------------------------------------------------------
+# Clearance model — DESIGNED BUT NOT REALISED. Kept as a record of the intent and
+# of why it could not be built.
+#
+# services[].data_classification maps 1:1 onto SynthWorld's InformationClassification
+# enum, and the ABAC layer does have ResourceClassificationFactV1, SubjectClearanceFactV1
+# and a classification_within_clearance predicate. But ResourceSetTemplateV1 has no
+# classification field, so the value cannot cross the blueprint boundary into the
+# compiled universe, and stage 20 builds the ABAC facts from the compiled universe
+# alone. No resource_classification or subject_clearance fact is emitted, and nothing
+# below is read by any stage. See docs/limitations.md 3.7.
+# InformationClassification ordering: public < internal < confidential < restricted
+# A subject's clearance is derived from the highest classification among the
+# services its team owns with ownership_type=primary.
+# ---------------------------------------------------------------------------
+clearance:
+  order: [public, internal, confidential, restricted]
+  derive_from: primary_owned_service_max_classification
+  default: internal
+
+# ---------------------------------------------------------------------------
+# Temporal model.
+# SynthWorld ticks are dimensionless logical integers. The corpus is evaluated
+# across these ticks; session slots and relation tuples carry validity windows.
+# ---------------------------------------------------------------------------
+temporal:
+  base_tick: 100
+  # Tick at which the revocation/expiry cases are evaluated. Sessions and
+  # relation tuples in the revocation cases have valid_until_tick = base_tick,
+  # so a cell at expired_tick must be denied.
+  expired_tick: 200
+  session_validity_ticks: 50
+
+# ---------------------------------------------------------------------------
+# Evaluation profile.
+# rbac_with_abac_guard: the directory RBAC derivation decides the base outcome,
+# and the ABAC rule set can only deny (guard), never widen. This is what lets a
+# single corpus exercise role-based, boundary-based and scope-based denial.
+# ---------------------------------------------------------------------------
+authorization:
+  evaluation_profile: rbac_with_abac_guard
+  rebac_profile: rebac_with_abac_guard
+
+# ---------------------------------------------------------------------------
+# Topaz projection.
+# ---------------------------------------------------------------------------
+topaz:
+  # Populated by infra/docker-compose.yaml; recorded here for the manifest.
+  policy_root: britannia
+  policy_package: britannia.authz
+  decision_name: allowed

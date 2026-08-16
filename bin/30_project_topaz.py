@@ -6,13 +6,14 @@ ZONE RULES
   reads  : 02-synthworld-public/**            (the 13 public artifacts)
            01-source/config/experiment.yaml   (experiment constants only)
   writes : 03-topaz-input/**
-           infra/policy/britannia/authz.rego  (so the running container loads the policy)
+           infra/policy/**                    (so the running container loads the policy)
 
   It never reads 06-evaluator/ or any truth artifact. Everything emitted here is a pure,
   deterministic function of the public artifact bytes.
 
 OUTPUTS
   03-topaz-input/model/manifest.yaml           Topaz v3 directory manifest (model.version: 3)
+  03-topaz-input/policy/.manifest              Topaz bundle root declaration
   03-topaz-input/policy/britannia/authz.rego   the Rego policy (seven decisions)
   03-topaz-input/directory/objects.jsonl       one POST body per line -> /api/v3/directory/object
   03-topaz-input/directory/relations.jsonl     one POST body per line -> /api/v3/directory/relation
@@ -39,6 +40,12 @@ PUBLIC = ROOT / "02-synthworld-public"
 CONFIG = ROOT / "01-source" / "config" / "experiment.yaml"
 OUT = ROOT / "03-topaz-input"
 INFRA_POLICY = ROOT / "infra" / "policy" / "britannia" / "authz.rego"
+INFRA_POLICY_MANIFEST = ROOT / "infra" / "policy" / ".manifest"
+
+POLICY_BUNDLE_MANIFEST = """{
+  "roots": ["britannia"]
+}
+"""
 
 POLICY_PACKAGE = "britannia.authz"
 DECISIONS = [
@@ -837,8 +844,10 @@ def main() -> int:
     (OUT / "model").mkdir(parents=True, exist_ok=True)
     (OUT / "policy" / "britannia").mkdir(parents=True, exist_ok=True)
     (OUT / "model" / "manifest.yaml").write_text(MANIFEST, encoding="utf-8")
+    (OUT / "policy" / ".manifest").write_text(POLICY_BUNDLE_MANIFEST, encoding="utf-8")
     (OUT / "policy" / "britannia" / "authz.rego").write_text(POLICY, encoding="utf-8")
     INFRA_POLICY.parent.mkdir(parents=True, exist_ok=True)
+    INFRA_POLICY_MANIFEST.write_text(POLICY_BUNDLE_MANIFEST, encoding="utf-8")
     INFRA_POLICY.write_text(POLICY, encoding="utf-8")
 
     n_obj = write_lines(OUT / "directory" / "objects.jsonl", (jdump(o) for o in objects))
@@ -1025,7 +1034,7 @@ One `POST /api/v2/authz/is` per evaluation cell ({summary['request_total']} cell
 | `rbac_final` | `effective` ∧ binding-gate ∧ lifecycle-gate. **No ABAC guard** — SynthWorld's directory-RBAC family gates `effective` by account binding and lifecycle only, and this is the decision `evaluate_enterprise_directory_rbac` scores. | mixed, see §6 |
 | `final` | `rbac_final` ∧ ¬`abac_deny`. The composed decision across all mechanisms. The released package ships **no scorer** for the composed access state, so this is reported descriptively, never as a score. | mixed, see §6 |
 | `abac_deny` | **fully evaluated by Rego** from the published facts and the published rules. The request carries the per-cell attribute facts and each in-scope deny rule verbatim (`{{rule_id, operator, predicates[]}}`); Rego evaluates the predicates and combines them under each rule's own operator. | derived |
-| `cross_tenant` | **derived by Rego** as `abac_subject_tenant_id != abac_resource_tenant_id`, independently of the rule scope, so the boundary condition is genuinely evaluated rather than asserted by a cell list. | derived |
+| `cross_tenant` | **derived by Rego** as `abac_subject_tenant_id != abac_resource_tenant_id`, independently of the rule scope. It is a **cross-check emitted beside the answer, not an input to it**: neither `abac_deny` nor `final` consults it, and deleting it would change no decision. The published cross-tenant rule still decides by enumerated `cell_ids` — it has to, since the ABAC vocabulary has no negation (`docs/limitations.md` §1.11). | derived, but not on the decision path |
 
 ### `effective` — the traversal, and where each step happens
 
@@ -1087,9 +1096,18 @@ cross-tenant rule's scope. Result: **{summary['abac_guard']['cells_denied']} cel
 
 The released ABAC predicate vocabulary offers `same_tenant` as a **positive** predicate only.
 There is no negation, so "deny unless the tenants match" cannot be written as a predicate at
-all — a cross-tenant deny rule can only be expressed by scoping it to a cell set. That is why
-the policy also derives `cross_tenant` on its own: so the boundary condition is evaluated by
-the PDP rather than merely asserted by a list of cell ids.
+all — a cross-tenant deny rule can only be expressed by scoping it to a cell set. The
+compiled `abac-deny-cross-tenant` rule does exactly that: `cell_ids` naming all 63 affected
+cells, plus one `action_class_is: [admin, execute, read, write]` predicate under operator
+`any`, which is true for every cell in the scope. **The rule is decided by its scope; nothing
+about tenancy is evaluated when it fires.**
+
+That is why the policy also derives `cross_tenant` on its own. Be precise about what that
+buys: it shows the boundary condition is computable from the published facts and that the
+published scope is correct (0 disagreements on 3209 cells). It does **not** put the boundary
+condition on the decision path — `cross_tenant` is a seventh decision returned beside the
+others, and `abac_deny`/`final` never read it. The check is supplied by this experiment; the
+enforcement is still an enumeration.
 
 **The RBAC derivation is not precomputed anywhere.** No role, group, hierarchy, grant or
 entitlement fact reaches the request body.
@@ -1105,6 +1123,14 @@ The policy therefore returns `binding_gate_pass := true` unconditionally, and th
 truth is `binding_status != matches_canonical` are **knowingly conceded**. This is recorded as
 a limit, not repaired with a guess. Anything else — heuristics over `account_kind`, tenant
 mismatch, target ownership — would be fabrication.
+
+Consequence, and it is stronger than "conceded": **the gate is dead code in this run.** All 15
+cells whose truth is `binding_status == mismatch` carry zero `effective_path_ids`, so
+`effective` is already `false` on every one of them and the conjunction in `rbac_final` never
+reaches the gate with anything to reject. Removing `binding_gate_pass` from the policy
+entirely would produce identical output on all 3209 cells. The `deny-wrong-principal-binding`
+case class scores 1.0000, but it is measuring the RBAC derivation, not the binding gate — see
+`docs/results.md` §7.2.
 
 ### Where `final` differs from the ladder note
 

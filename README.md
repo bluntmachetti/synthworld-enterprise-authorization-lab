@@ -1,6 +1,6 @@
-# SynthWorld enterprise authorization reference lab
+# SynthWorld frozen enterprise authorization reference experiment
 
-This companion lab demonstrates how an external consumer can use the released
+This frozen reference experiment demonstrates how an external consumer used the released
 `idcognito-synthworld==0.16.0` package to generate enterprise identity and
 authorization benchmarks, project only public artifacts into Aserto Topaz, and
 score the resulting decisions against separately mounted evaluator truth.
@@ -9,9 +9,17 @@ It is intentionally outside the SynthWorld core repository. Topaz, Rego, Docker,
 and the Britannia topology are experiment concerns; SynthWorld remains a
 protocol-neutral deterministic benchmark package.
 
-Support level: **reference lab**. The workflow is CI-verified against the exact
-versions below, but it is not a production deployment or a supported Topaz
-integration library.
+Publication status: **frozen and unsupported**. The workflow was CI-verified and
+reproduced byte-for-byte against the exact versions below before publication. It
+is retained as evidence of one experiment, not as a maintained Topaz integration,
+adapter SDK, compatibility promise, or invitation to add other authorization
+systems here.
+
+Community experiments remain owned by their authors. They may be indexed as
+self-reported results in the SynthWorld
+[Experiment results](https://github.com/bluntmachetti/synthworld/discussions/categories/experiment-results)
+Discussion category; inclusion does not mean that SynthWorld maintainers have
+reviewed, reproduced, endorsed, or agreed to support them.
 
 ## What the lab tests
 
@@ -29,18 +37,24 @@ score.
 
 The adapter boundary is file based: public SynthWorld artifacts enter the
 projector; raw product requests/responses leave the runner; typed SynthWorld
-predictions enter the scorer. A future AuthZEN, OPA, OpenFGA, or other adapter can
-replace the projector/runner pair without changing benchmark-owner or scorer
-capabilities.
+predictions enter the scorer. That boundary shows how an independently maintained
+AuthZEN, OPA, OpenFGA, or other adapter could replace the projector/runner pair;
+this publication does not undertake to build or maintain those adapters.
 
 ## Reproduce it
 
 Prerequisites: Docker with Compose v2. No local Python environment, SynthWorld
 checkout, or Topaz installation is needed.
 
+Download and verify the reproduction kit attached to the immutable SynthWorld
+release
+[`enterprise-authorization-topaz-0.16.0-1`](https://github.com/bluntmachetti/synthworld/releases/tag/enterprise-authorization-topaz-0.16.0-1),
+then run:
+
 ```bash
-git clone <repository-url>
-cd synthworld-enterprise-authorization-lab
+sha256sum -c SHA256SUMS
+unzip enterprise-authorization-topaz-reproduction-kit-0.16.0-1.zip
+cd enterprise-authorization-topaz-reproduction-kit-0.16.0-1
 bin/run_lab.sh
 ```
 

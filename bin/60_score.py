@@ -6,35 +6,45 @@ refuses to run until it has re-verified the pre-scoring submission digest
 recorded by stage 50. If the submission changed after that digest was taken, the
 blinding claim is void and this stage aborts.
 
-Scoring uses the released per-mechanism scorers:
+Scoring uses the released composed and per-mechanism scorers:
+  evaluate_enterprise_authorization       composed effective/final decisions
   evaluate_enterprise_directory_rbac   RBAC family (B/I/E/F, roles, activation, SoD)
   evaluate_enterprise_abac             ABAC guard family
   evaluate_enterprise_rebac            relationship family
 
-There is deliberately no aggregate. The released package ships no scorer for the
-composed CompiledEnterpriseAccessStateV1 at all, so the multi-mechanism decision
-is reported descriptively and never as a score. See docs/limitations.md.
+There is deliberately no aggregate. Every metric retains its own denominator.
 """
 
 from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.metadata
 import json
 import sys
 from pathlib import Path
 
-from synthworld.enterprise import (
+import yaml
+from synthworld.enterprise.authorization.adversarial import (
+    EnterpriseAdversarialAuthorizationEvaluatorV1,
+    EnterpriseAdversarialAuthorizationPredictionV1,
+    EnterpriseAdversarialAuthorizationPublicV1,
+    evaluate_enterprise_adversarial_authorization,
+)
+from synthworld.enterprise.consumer import (
+    EnterpriseAbacPredictionV1,
+    EnterpriseAuthorizationPredictionV1,
+    EnterpriseDirectoryRbacPredictionV1,
+    EnterpriseRebacPredictionV1,
     evaluate_enterprise_abac,
+    evaluate_enterprise_authorization,
     evaluate_enterprise_directory_rbac,
     evaluate_enterprise_rebac,
     load_evaluator_enterprise_authorization,
     load_evaluator_enterprise_case_inventory,
     load_evaluator_enterprise_directory_rbac_truth,
+    load_public_enterprise_authorization,
 )
-from synthworld.enterprise.abac import EnterpriseAbacPredictionV1
-from synthworld.enterprise.rbac import EnterpriseDirectoryRbacPredictionV1
-from synthworld.enterprise.rebac import EnterpriseRebacPredictionV1
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -98,21 +108,34 @@ NOT_EXERCISED = {
 
 
 def canonical_bytes(document) -> bytes:
-    return json.dumps(
-        document, sort_keys=True, separators=(",", ":"), ensure_ascii=False
-    ).encode("utf-8")
+    return json.dumps(document, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode(
+        "utf-8"
+    )
 
 
-def verify_digest(submission_dir: Path) -> dict:
-    manifest = json.loads((submission_dir / "SUBMISSION-DIGEST.json").read_text("utf-8"))
+def sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def verify_seal(submission_dir: Path) -> dict:
+    seal_path = submission_dir / "SUBMISSION-SEAL.json"
+    if not seal_path.is_file():
+        raise SystemExit("SUBMISSION SEAL ABSENT - refusing to open evaluator truth")
+    manifest = json.loads(seal_path.read_text("utf-8"))
+    if manifest.get("seal_schema") != ("synthworld-enterprise-authorization-submission-seal/2"):
+        raise SystemExit("unsupported submission seal schema; refusing to score")
+    sealed = dict(manifest)
+    recorded_seal = sealed.pop("seal_sha256", None)
+    if hashlib.sha256(canonical_bytes(sealed)).hexdigest() != recorded_seal:
+        raise SystemExit("submission seal document was modified; refusing to score")
     recomputed = {}
-    for name in sorted(manifest["sha256"]):
-        raw = (submission_dir / name).read_bytes().rstrip(b"\n")
+    for name in sorted(manifest["submission_sha256"]):
+        raw = (submission_dir / name).read_bytes()
         recomputed[name] = hashlib.sha256(raw).hexdigest()
     drift = {
-        n: (manifest["sha256"][n], recomputed[n])
+        n: (manifest["submission_sha256"][n], recomputed[n])
         for n in recomputed
-        if manifest["sha256"][n] != recomputed[n]
+        if manifest["submission_sha256"][n] != recomputed[n]
     }
     if drift:
         raise SystemExit(
@@ -124,6 +147,56 @@ def verify_digest(submission_dir: Path) -> dict:
     ).hexdigest()
     if combined != manifest["combined_sha256"]:
         raise SystemExit("combined submission digest mismatch; refusing to score")
+
+    evidence_drift = {
+        name: (expected, sha256_file(REPO / name))
+        for name, expected in sorted(manifest["evidence_sha256"].items())
+        if not (REPO / name).is_file() or sha256_file(REPO / name) != expected
+    }
+    if evidence_drift:
+        raise SystemExit(
+            "SEALED EVIDENCE MISMATCH - public input, raw result, policy, adapter, "
+            f"or isolation evidence changed. Refusing to score.\n{json.dumps(evidence_drift, indent=1)}"
+        )
+    public_index = json.loads((REPO / "02-synthworld-public/PUBLIC-INDEX.json").read_text("utf-8"))
+    if public_index.get("sha256") != manifest["public_artifact_sha256"]:
+        raise SystemExit("public artifact inventory differs from the sealed run")
+    for name, expected in sorted(public_index["sha256"].items()):
+        path = REPO / "02-synthworld-public" / name
+        if not path.is_file() or sha256_file(path) != expected:
+            raise SystemExit(f"public artifact changed after sealing: {name}")
+
+    config = yaml.safe_load((REPO / "01-source/config/experiment.yaml").read_text("utf-8"))
+    installed = importlib.metadata.version("idcognito-synthworld")
+    recorded = manifest["provenance"]["synthworld"]
+    if installed != recorded["version"] or installed != config["synthworld"]["version"]:
+        raise SystemExit("SynthWorld package version differs from sealed provenance")
+    if any(
+        recorded[field] != config["synthworld"][field] for field in ("wheel_sha256", "sdist_sha256")
+    ):
+        raise SystemExit("SynthWorld distribution digests differ from sealed provenance")
+    if manifest["provenance"]["topaz"]["image"] != config["topaz"]["image"]:
+        raise SystemExit("Topaz image differs from sealed provenance")
+    topaz = manifest["provenance"]["topaz"]
+    if (
+        topaz["version"] != config["topaz"]["version"]
+        or topaz["commit"] != config["topaz"]["commit"]
+        or topaz["adversarial_version"] != topaz["version"]
+        or topaz["adversarial_commit"] != topaz["commit"]
+    ):
+        raise SystemExit("Topaz runtime version differs from sealed provenance")
+    adapter_sources = {
+        name: digest
+        for name, digest in manifest["evidence_sha256"].items()
+        if name.startswith("bin/")
+    }
+    adapter_digest = hashlib.sha256(
+        canonical_bytes(dict(sorted(adapter_sources.items())))
+    ).hexdigest()
+    if adapter_digest != manifest["provenance"]["adapter"]["source_sha256"]:
+        raise SystemExit("adapter source digest differs from sealed provenance")
+    if set(manifest["schema_versions"].values()) != {"1.0.0"}:
+        raise SystemExit("unsupported prediction or public artifact schema version")
     return manifest
 
 
@@ -149,40 +222,65 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--submission", default=str(REPO / "05-submission"))
     ap.add_argument("--evaluator", default=str(REPO / "06-evaluator/artifacts/synthworld"))
-    ap.add_argument("--out", default=str(REPO / "06-evaluator/scoring"))
+    ap.add_argument("--out", default=str(REPO / "07-reports/scoring"))
     args = ap.parse_args()
 
     submission_dir = Path(args.submission)
-    manifest = verify_digest(submission_dir)
+    manifest = verify_seal(submission_dir)
     print("submission digest verified:", manifest["combined_sha256"])
 
     root = Path(args.evaluator)
     rbac_truth = load_evaluator_enterprise_directory_rbac_truth(root / "directory-rbac")
     authorization = load_evaluator_enterprise_authorization(root / "authorization")
+    authorization_public = load_public_enterprise_authorization(root / "authorization")
     case_inventory = load_evaluator_enterprise_case_inventory(root / "evaluation-corpus")
 
     def load(model, name):
-        return model.model_validate_json(
-            (submission_dir / name).read_text("utf-8")
-        )
+        return model.model_validate_json((submission_dir / name).read_text("utf-8"))
 
     rbac_pred = load(EnterpriseDirectoryRbacPredictionV1, "directory-rbac-prediction.json")
     abac_pred = load(EnterpriseAbacPredictionV1, "abac-prediction.json")
     rebac_pred = load(EnterpriseRebacPredictionV1, "rebac-prediction.json")
+    composed_pred = load(
+        EnterpriseAuthorizationPredictionV1,
+        "enterprise-authorization-prediction.json",
+    )
+    adversarial_root = root.parent / "adversarial"
+    adversarial_public = EnterpriseAdversarialAuthorizationPublicV1.model_validate_json(
+        (adversarial_root / "public/enterprise-adversarial-authorization.json").read_bytes()
+    )
+    adversarial_evaluator = EnterpriseAdversarialAuthorizationEvaluatorV1.model_validate_json(
+        (
+            adversarial_root / "evaluator/enterprise-adversarial-authorization-evaluator.json"
+        ).read_bytes()
+    )
+    adversarial_pred = load(
+        EnterpriseAdversarialAuthorizationPredictionV1,
+        "adversarial-authorization-prediction.json",
+    )
+    adversarial_metrics = evaluate_enterprise_adversarial_authorization(
+        public=adversarial_public,
+        evaluator=adversarial_evaluator,
+        prediction=adversarial_pred,
+    )
 
     families = {
+        "adversarial": metrics_to_rows(adversarial_metrics),
+        "composed": metrics_to_rows(
+            evaluate_enterprise_authorization(
+                scope=authorization_public.evaluation_scope,
+                truth=authorization.access_state,
+                predictions=composed_pred,
+            )
+        ),
         "directory_rbac": metrics_to_rows(
             evaluate_enterprise_directory_rbac(truth=rbac_truth, predictions=rbac_pred)
         ),
         "abac": metrics_to_rows(
-            evaluate_enterprise_abac(
-                truth=authorization.abac_truth, predictions=abac_pred
-            )
+            evaluate_enterprise_abac(truth=authorization.abac_truth, predictions=abac_pred)
         ),
         "rebac": metrics_to_rows(
-            evaluate_enterprise_rebac(
-                truth=authorization.rebac_truth, predictions=rebac_pred
-            )
+            evaluate_enterprise_rebac(truth=authorization.rebac_truth, predictions=rebac_pred)
         ),
     }
 
@@ -209,21 +307,17 @@ def main() -> int:
 
     # Per-case-class breakdown, using the evaluator case inventory labels.
     #
-    # IMPORTANT, and the reason the keys below say `rbac_final` rather than `final`:
-    # both decisions here come from the directory-RBAC family. `rbac_truth.cells[].
-    # final_decision` is `effective` gated by account binding and lifecycle ONLY - the
-    # ABAC guard is a separate mechanism with a separate truth and a separate scorer, and
-    # the released package ships NO scorer for the composed access state. So a class named
-    # for an ABAC deny ("deny-cross-tenant-boundary", "deny-scope-exceeded") is scored here
-    # against an RBAC-family truth that says ALLOW. `rbac_truth_final_deny` below makes
-    # that visible per class instead of leaving it to be inferred: where it is 0, the deny
-    # this class is named for is not what was scored.
+    # RBAC-family final and composed final are intentionally kept separate: the
+    # former applies binding/lifecycle gates, while the latter also includes the
+    # selected ABAC guard.
     labels: dict[str, list[str]] = {}
     for case in case_inventory.cases:
         if str(case.target_kind) == "access_cell" or "access_cell" in str(case.target_kind):
             labels[case.target_id] = [str(x) for x in case.labels]
     truth_by_cell = {c.cell_id: c for c in rbac_truth.cells}
     pred_by_cell = {c.cell_id: c for c in rbac_pred.cells}
+    composed_truth_by_cell = {c.cell_id: c for c in authorization.access_state.cells}
+    composed_pred_by_cell = {c.cell_id: c for c in composed_pred.cells}
     per_class: dict[str, dict[str, int]] = {}
     for cell_id, labs in labels.items():
         t, p = truth_by_cell.get(cell_id), pred_by_cell.get(cell_id)
@@ -238,28 +332,32 @@ def main() -> int:
                     "n": 0,
                     "effective_correct": 0,
                     "rbac_final_correct": 0,
+                    "composed_final_correct": 0,
                     "rbac_truth_final_deny": 0,
                 },
             )
             b["n"] += 1
-            b["effective_correct"] += int(
-                str(p.effective_decision) == str(t.effective_decision)
-            )
-            b["rbac_final_correct"] += int(
-                str(p.final_decision) == str(t.final_decision)
+            b["effective_correct"] += int(str(p.effective_decision) == str(t.effective_decision))
+            b["rbac_final_correct"] += int(str(p.final_decision) == str(t.final_decision))
+            b["composed_final_correct"] += int(
+                composed_pred_by_cell[cell_id].final_decision
+                is composed_truth_by_cell[cell_id].final_decision
             )
             b["rbac_truth_final_deny"] += int(str(t.final_decision) == "deny")
     for bucket in per_class.values():
         bucket["effective_accuracy"] = round(bucket["effective_correct"] / bucket["n"], 4)
-        bucket["rbac_final_accuracy"] = round(
-            bucket["rbac_final_correct"] / bucket["n"], 4
-        )
-        bucket["composed_decision_scored"] = False
+        bucket["rbac_final_accuracy"] = round(bucket["rbac_final_correct"] / bucket["n"], 4)
+        bucket["composed_final_accuracy"] = round(bucket["composed_final_correct"] / bucket["n"], 4)
+        bucket["composed_decision_scored"] = True
 
     report = {
         "submission_digest": manifest["combined_sha256"],
         "submission_digest_verified_before_scoring": True,
         "cells_scored": len(rbac_pred.cells),
+        "adversarial_attempts_scored": len(adversarial_pred.attempts),
+        "adversarial_cohorts": [
+            item.model_dump(mode="json") for item in adversarial_metrics.cohorts
+        ],
         "scored_metrics": sorted(scored, key=lambda r: (r["scorer"], r["family"], r["name"])),
         "not_publicly_winnable": sorted(
             not_winnable, key=lambda r: (r["scorer"], r["family"], r["name"])
@@ -272,25 +370,14 @@ def main() -> int:
         ),
         "per_case_class": dict(sorted(per_class.items())),
         "per_case_class_note": (
-            "Both columns are directory-RBAC-family decisions. `rbac_final` is "
-            "`effective` gated by account binding and lifecycle only; it does NOT "
-            "include the ABAC guard, and the released package ships no scorer for the "
-            "composed decision, so `composed_decision_scored` is false everywhere. "
-            "Read `rbac_truth_final_deny` before reading a class name: for "
-            "deny-cross-tenant-boundary (63) and deny-scope-exceeded (164) it is 0 - "
-            "the RBAC-family truth for those cells is allow, the prediction is allow, "
-            "and the deny the class is named for lives only in the composed Topaz "
-            "decision, which is reported descriptively in docs/results.md section 4 "
-            "and never scored. Likewise deny-wrong-principal-binding (15) is scored "
-            "deny because the RBAC derivation finds no path, not because the binding "
-            "gate fired - the policy concedes that gate with `binding_gate_pass := "
-            "true`."
+            "RBAC-family final and composed final are reported independently. The "
+            "composed column includes the public ABAC guard and is scored through "
+            "the released SynthWorld 0.16.0 evaluation-scope contract."
         ),
         "aggregate": None,
         "aggregate_note": (
-            "The released scorers deliberately emit no aggregate, and the package "
-            "ships no scorer for the composed CompiledEnterpriseAccessStateV1 at "
-            "all. Families carry different denominators and are not commensurable; "
+            "The released scorers deliberately emit no aggregate. Families carry "
+            "different denominators and are not commensurable; "
             "no overall score is computed here."
         ),
     }
@@ -316,17 +403,14 @@ def main() -> int:
     print(f"\n=== WORLD PROPERTIES, NOT SCORES ({len(world_properties)}) ===")
     for row in report["world_property_metrics_not_scores"]:
         print(f"  {row['family']}.{row['name']}: {row['value']}")
-    print("\n=== PER CASE CLASS (directory-RBAC family only) ===")
+    print("\n=== PER CASE CLASS ===")
     for lab, b in report["per_case_class"].items():
         print(
             f"  {lab:34s} n={b['n']:5d}  effective={b['effective_accuracy']:.4f}  "
             f"rbac_final={b['rbac_final_accuracy']:.4f}  "
+            f"composed_final={b['composed_final_accuracy']:.4f}  "
             f"rbac_truth_final_deny={b['rbac_truth_final_deny']:5d}"
         )
-    print(
-        "  (no scorer exists for the composed decision; a class with "
-        "rbac_truth_final_deny=0\n   was scored against an allow truth)"
-    )
     print(f"\nreport -> {out / 'scoring-report.json'}")
     return 0
 

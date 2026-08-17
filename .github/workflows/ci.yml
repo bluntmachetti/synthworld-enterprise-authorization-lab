@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  reference-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Static checks
+        run: |
+          uvx ruff check bin/*.py
+          python -m compileall -q bin
+          docker compose config --quiet
+
+      - name: Clean-room reference run
+        run: bin/run_lab.sh
+
+      - name: Byte-identical second run
+        run: bin/check_reproducibility.sh
+
+      - name: Upload machine reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthworld-enterprise-authorization-reports
+          path: |
+            05-submission/SUBMISSION-SEAL.json
+            07-reports

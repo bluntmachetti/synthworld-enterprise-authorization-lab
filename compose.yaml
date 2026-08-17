@@ -1,0 +1,96 @@
+name: synthworld-enterprise-authorization-lab
+
+x-lab: &lab
+  image: synthworld-enterprise-authorization-lab:local
+  build:
+    context: .
+  working_dir: /app
+  user: "${LAB_UID:-1000}:${LAB_GID:-1000}"
+  read_only: true
+  cap_drop: [ALL]
+  security_opt:
+    - no-new-privileges:true
+  tmpfs:
+    - /tmp:size=64m,mode=1777
+
+services:
+  owner:
+    <<: *lab
+    network_mode: none
+    command: ["bash", "bin/owner.sh"]
+    volumes:
+      - ./01-source/generated:/app/01-source/generated:rw,Z
+      - ./01-source/topology:/app/01-source/topology:ro,Z
+      - ./02-synthworld-public:/app/02-synthworld-public:rw,Z
+      - ./06-evaluator:/app/06-evaluator:rw,Z
+
+  projector:
+    <<: *lab
+    network_mode: none
+    command: ["bash", "bin/projector.sh"]
+    volumes:
+      - ./01-source/generated:/app/01-source/generated:ro,Z
+      - ./02-synthworld-public:/app/02-synthworld-public:ro,Z
+      - ./03-topaz-input:/app/03-topaz-input:rw,Z
+
+  topaz:
+    image: ghcr.io/aserto-dev/topaz:0.33.16@sha256:835868c04bdd7129127ea43642ffff7363d0bd26d5e1a37631fa881431054360
+    command: ["run", "-c", "/config/config.yaml"]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    volumes:
+      - ./infra/config:/config:ro,Z
+      - ./03-topaz-input/policy:/bundle:ro,Z
+      - topaz-db:/db
+    networks: [sut]
+
+  runner:
+    <<: *lab
+    command: ["bash", "bin/runner.sh"]
+    environment:
+      TOPAZ_AUTHZ_HOST: topaz
+      TOPAZ_DS_HOST: topaz
+    volumes:
+      - ./01-source/generated:/app/01-source/generated:ro,Z
+      - ./02-synthworld-public:/app/02-synthworld-public:ro,Z
+      - ./03-topaz-input:/app/03-topaz-input:ro,Z
+      - ./04-topaz-results:/app/04-topaz-results:rw,Z
+      - ./05-submission:/app/05-submission:rw,Z
+      - ./viz:/app/viz:rw,Z
+    networks: [sut]
+
+  scorer:
+    <<: *lab
+    network_mode: none
+    command: ["bash", "bin/scorer.sh"]
+    volumes:
+      - ./01-source/generated:/app/01-source/generated:ro,Z
+      - ./01-source/topology:/app/01-source/topology:ro,Z
+      - ./02-synthworld-public:/app/02-synthworld-public:ro,Z
+      - ./03-topaz-input:/app/03-topaz-input:ro,Z
+      - ./04-topaz-results:/app/04-topaz-results:ro,Z
+      - ./05-submission:/app/05-submission:ro,Z
+      - ./06-evaluator:/app/06-evaluator:ro,Z
+      - ./07-reports:/app/07-reports:rw,Z
+      - ./viz:/app/viz:ro,Z
+
+  isolation-regression:
+    <<: *lab
+    profiles: [isolation-regression]
+    network_mode: none
+    command: ["python", "bin/05_check_isolation.py"]
+    volumes:
+      - ./02-synthworld-public:/app/02-synthworld-public:ro,Z
+      - ./04-topaz-results:/app/04-topaz-results:rw,Z
+      - ./06-evaluator:/evaluator:ro,Z
+
+networks:
+  sut:
+    internal: true
+
+volumes:
+  topaz-db:

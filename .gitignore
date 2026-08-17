@@ -10,6 +10,7 @@ docs/discovery-notes/
 01-source/generated/
 01-source/topology/
 02-synthworld-public/
+03-topaz-input/
 03-topaz-input/MAPPING.md
 03-topaz-input/PROJECTION-SUMMARY.json
 03-topaz-input/directory/
@@ -20,9 +21,11 @@ docs/discovery-notes/
 05-submission/
 06-evaluator/
 reports/
+07-reports/
 viz/
 infra/policy/
 
 # Local tool state.
 .qwen/
 .codex/
+.ruff_cache/

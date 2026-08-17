@@ -29,7 +29,6 @@ import argparse
 import http.client
 import json
 import os
-import subprocess
 import sys
 import threading
 import time
@@ -41,14 +40,12 @@ from urllib.parse import urlencode
 ROOT = Path(__file__).resolve().parent.parent
 IN = ROOT / "03-topaz-input"
 OUTDIR = ROOT / "04-topaz-results"
-INFRA = ROOT / "infra"
 
 DS_HOST = os.environ.get("TOPAZ_DS_HOST", "127.0.0.1")
 DS_PORT = int(os.environ.get("TOPAZ_DS_PORT", "9393"))
 AZ_HOST = os.environ.get("TOPAZ_AUTHZ_HOST", "127.0.0.1")
 AZ_PORT = int(os.environ.get("TOPAZ_AUTHZ_PORT", "8383"))
 
-COMPOSE_PROJECT = os.environ.get("TOPAZ_PROJECT", "britannia-phase2")
 POLICY_PACKAGE = "britannia.authz"
 JSON_HDR = {"Content-Type": "application/json", "Accept": "application/json"}
 
@@ -79,7 +76,7 @@ class Conn:
                 try:
                     if self._c:
                         self._c.close()
-                except Exception:
+                except OSError:
                     pass
                 self._c = None
                 if attempt == 1:
@@ -98,7 +95,7 @@ class Conn:
         if self._c:
             try:
                 self._c.close()
-            except Exception:
+            except OSError:
                 pass
             self._c = None
 
@@ -144,8 +141,10 @@ def read_jsonl(path: Path):
 # ---------------------------------------------------------------------------- steps
 def step1_assert_up(ds: Pool, az: Pool):
     print("== 1. assert Topaz is up ==")
-    for label, pool, path in (("directory 9393", ds, "/api/v3/directory/manifest"),
-                              ("authorizer 8383", az, "/api/v2/policies")):
+    for label, pool, path in (
+        ("directory 9393", ds, "/api/v3/directory/manifest"),
+        ("authorizer 8383", az, "/api/v2/policies"),
+    ):
         try:
             status, _ = pool.get().request("GET", path)
         except OSError as exc:
@@ -174,9 +173,6 @@ def wait_ready(ds: Pool, az: Pool, attempts=60):
 def step2_policy(ds: Pool, az: Pool):
     print("== 2. policy bundle ==")
     want = (IN / "policy" / "britannia" / "authz.rego").read_text(encoding="utf-8")
-    live_path = INFRA / "policy" / "britannia" / "authz.rego"
-    if live_path.read_text(encoding="utf-8") != want:
-        die(f"{live_path} differs from {IN}/policy/britannia/authz.rego — re-run stage 30.")
 
     def loaded():
         status, body = az.get().json("GET", "/api/v2/policies")
@@ -188,27 +184,18 @@ def step2_policy(ds: Pool, az: Pool):
         return None
 
     pol = loaded()
-    if pol is None or pol.get("raw") != want:
-        # local_bundles without watch: a .rego edit needs a container restart (§7.6)
-        print("   loaded policy is absent/stale -> restarting container to reload the bundle")
-        subprocess.run(
-            ["docker", "compose", "-p", COMPOSE_PROJECT,
-             "-f", str(INFRA / "docker-compose.yaml"), "restart", "topaz"],
-            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-        )
-        ds.close()
-        az.close()
-        if not wait_ready(ds, az):
-            die("gateways did not come back after restart")
-        pol = loaded()
-
     if pol is None:
         die(f"policy {POLICY_PACKAGE} is not loaded (GET /api/v2/policies)")
     if pol.get("raw") != want:
-        die(f"loaded policy for {POLICY_PACKAGE} does not match 03-topaz-input")
+        die(
+            f"loaded policy for {POLICY_PACKAGE} does not match 03-topaz-input; "
+            "restart Topaz after projecting the policy bundle"
+        )
     if not pol.get("ast"):
-        die(f"policy {POLICY_PACKAGE} has an empty `ast` -> it did NOT compile; "
-            "every decision would silently fall to its default")
+        die(
+            f"policy {POLICY_PACKAGE} has an empty `ast` -> it did NOT compile; "
+            "every decision would silently fall to its default"
+        )
     print(f"   {pol['id']}")
     print(f"   package_path {pol['package_path']}  ast_bytes {len(pol['ast'])}  COMPILED")
 
@@ -219,8 +206,12 @@ def step3_load(ds: Pool, workers: int):
     # The manifest body is raw YAML, not JSON-wrapped (topaz-reference.md §5.2), so it goes
     # over its own short-lived connection rather than through the JSON helper.
     c = http.client.HTTPConnection(DS_HOST, DS_PORT, timeout=60)
-    c.request("POST", "/api/v3/directory/manifest", body=manifest,
-              headers={"Content-Type": "application/yaml"})
+    c.request(
+        "POST",
+        "/api/v3/directory/manifest",
+        body=manifest,
+        headers={"Content-Type": "application/yaml"},
+    )
     r = c.getresponse()
     body = r.read()
     c.close()
@@ -230,20 +221,30 @@ def step3_load(ds: Pool, workers: int):
 
     timings = {}
     counts = {}
-    for name, fname, path in (("objects", "objects.jsonl", "/api/v3/directory/object"),
-                              ("relations", "relations.jsonl", "/api/v3/directory/relation")):
+    for name, fname, path in (
+        ("objects", "objects.jsonl", "/api/v3/directory/object"),
+        ("relations", "relations.jsonl", "/api/v3/directory/relation"),
+    ):
         records = list(read_jsonl(IN / "directory" / fname))
         t0 = time.monotonic()
         errors = []
         done = [0]
         lock = threading.Lock()
 
-        def post(rec, _path=path, _errors=errors):
+        def post(
+            rec,
+            _path=path,
+            _errors=errors,
+            _lock=lock,
+            _done=done,
+            _name=name,
+            _records=records,
+        ):
             status, resp = ds.get().json("POST", _path, rec)
-            with lock:
-                done[0] += 1
-                if done[0] % 1000 == 0:
-                    print(f"   {name}: {done[0]}/{len(records)}", flush=True)
+            with _lock:
+                _done[0] += 1
+                if _done[0] % 1000 == 0:
+                    print(f"   {_name}: {_done[0]}/{len(_records)}", flush=True)
             if status != 200:
                 _errors.append({"status": status, "record": rec, "response": resp})
 
@@ -254,11 +255,16 @@ def step3_load(ds: Pool, workers: int):
         counts[name] = len(records)
         if errors:
             for e in errors[:5]:
-                print(f"   ERROR {e['status']}: {json.dumps(e['record'])[:200]} -> "
-                      f"{json.dumps(e['response'])[:200]}", file=sys.stderr)
+                print(
+                    f"   ERROR {e['status']}: {json.dumps(e['record'])[:200]} -> "
+                    f"{json.dumps(e['response'])[:200]}",
+                    file=sys.stderr,
+                )
             die(f"{len(errors)} {name} failed to write")
-        print(f"   {name}: {len(records)} written, 0 errors, {dt:.1f}s "
-              f"({len(records)/max(dt, 1e-9):.0f}/s)")
+        print(
+            f"   {name}: {len(records)} written, 0 errors, {dt:.1f}s "
+            f"({len(records) / max(dt, 1e-9):.0f}/s)"
+        )
     return counts, timings
 
 
@@ -304,12 +310,24 @@ def step4_verify(ds: Pool, summary: dict):
     # ---- relations, per tuple shape
     live_relations = list_all(ds, "/api/v3/directory/relations", {})
     live_rel_counts = Counter(
-        (r["object_type"], r["relation"], r["subject_type"], r.get("subject_relation") or "")
+        (
+            r["object_type"],
+            r["relation"],
+            r["subject_type"],
+            r.get("subject_relation") or "",
+        )
         for r in live_relations
     )
     want_rel_counts = Counter(
-        {(x["object_type"], x["relation"], x["subject_type"], x["subject_relation"]): x["count"]
-         for x in summary["relation_counts"]}
+        {
+            (
+                x["object_type"],
+                x["relation"],
+                x["subject_type"],
+                x["subject_relation"],
+            ): x["count"]
+            for x in summary["relation_counts"]
+        }
     )
     print(f"   relations read back: {len(live_relations)} (expected {summary['relation_total']})")
     for key in sorted(set(live_rel_counts) | set(want_rel_counts)):
@@ -324,7 +342,8 @@ def step4_verify(ds: Pool, summary: dict):
         bad.append(f"object total: expected {summary['object_total']}, got {len(live_objects)}")
     if len(live_relations) != summary["relation_total"]:
         bad.append(
-            f"relation total: expected {summary['relation_total']}, got {len(live_relations)}")
+            f"relation total: expected {summary['relation_total']}, got {len(live_relations)}"
+        )
     if bad:
         for b in bad:
             print(f"   !! {b}", file=sys.stderr)
@@ -338,17 +357,29 @@ def step4_verify(ds: Pool, summary: dict):
     for case in summary["smoke_checks"]:
         status, body = ds.get().json("POST", "/api/v3/directory/check", case["body"])
         got = bool(body.get("check")) if status == 200 else None
-        ok = (status == 200 and got == case["expect"])
+        ok = status == 200 and got == case["expect"]
         failures += 0 if ok else 1
-        smoke_results.append({**case, "http_status": status, "got": got, "ok": ok,
-                              "context": body.get("context")})
-        print(f"      [{'PASS' if ok else 'FAIL'}] expected {case['expect']!s:<5} "
-              f"got {got!s:<5}  {case['name']}")
+        smoke_results.append(
+            {
+                **case,
+                "http_status": status,
+                "got": got,
+                "ok": ok,
+                "context": body.get("context"),
+            }
+        )
+        print(
+            f"      [{'PASS' if ok else 'FAIL'}] expected {case['expect']!s:<5} "
+            f"got {got!s:<5}  {case['name']}"
+        )
     if failures:
         die(f"{failures} directory smoke check(s) failed — model or load is wrong")
-    return {"objects_read_back": len(live_objects), "relations_read_back": len(live_relations),
-            "object_counts": dict(sorted(live_obj_counts.items())),
-            "smoke_checks": smoke_results}
+    return {
+        "objects_read_back": len(live_objects),
+        "relations_read_back": len(live_relations),
+        "object_counts": dict(sorted(live_obj_counts.items())),
+        "smoke_checks": smoke_results,
+    }
 
 
 def step5_decisions(az: Pool, requests: list, workers: int):
@@ -376,7 +407,7 @@ def step5_decisions(az: Pool, requests: list, workers: int):
     with ThreadPoolExecutor(max_workers=workers) as pool:
         list(pool.map(call, range(len(requests))))
     dt = time.monotonic() - t0
-    print(f"   {len(requests)} decisions in {dt:.1f}s ({len(requests)/max(dt, 1e-9):.0f}/s)")
+    print(f"   {len(requests)} decisions in {dt:.1f}s ({len(requests) / max(dt, 1e-9):.0f}/s)")
     return results, round(dt, 3)
 
 
@@ -398,8 +429,10 @@ def normalize(results):
         if row["http_status"] != 200:
             errors.append(row)
             continue
-        got = {d["decision"]: bool(d.get("is", False))
-               for d in (row["response"].get("decisions") or [])}
+        got = {
+            d["decision"]: bool(d.get("is", False))
+            for d in (row["response"].get("decisions") or [])
+        }
         missing = [d for d in DECISIONS if d not in got]
         if missing:
             errors.append({**row, "_missing_decisions": missing})
@@ -423,9 +456,7 @@ def read_all_relations(ds: Pool, object_type: str, relation: str) -> dict[str, s
         query = {"object_type": object_type, "relation": relation, "page.size": "100"}
         if token:
             query["page.token"] = token
-        status, body = ds.get().json(
-            "GET", f"/api/v3/directory/relations?{urlencode(query)}"
-        )
+        status, body = ds.get().json("GET", f"/api/v3/directory/relations?{urlencode(query)}")
         if status != 200:
             die(f"relation listing failed: HTTP {status} {body}")
         rows = body.get("results", [])
@@ -515,7 +546,7 @@ def main() -> int:
     verification = step4_verify(ds, summary)
     results, decide_seconds = step5_decisions(az, requests, args.workers)
 
-    role_sets, role_seconds = step5b_role_holders(ds, args.workers)
+    role_sets, _role_seconds = step5b_role_holders(ds, args.workers)
     normalized, errors = normalize(results)
 
     print("== 6/7/8. write results ==")
@@ -533,22 +564,16 @@ def main() -> int:
     )
 
     dist = {d: Counter(v[d] for v in normalized.values()) for d in DECISIONS}
-    distribution = {
-        d: {"allow": dist[d][True], "deny": dist[d][False]} for d in DECISIONS
-    }
+    distribution = {d: {"allow": dist[d][True], "deny": dist[d][False]} for d in DECISIONS}
     # cross-tab: how final differs from effective, and why it can
     downgrades = sum(1 for v in normalized.values() if v["effective"] and not v["final"])
-    rbac_downgrades = sum(
-        1 for v in normalized.values() if v["effective"] and not v["rbac_final"]
-    )
+    rbac_downgrades = sum(1 for v in normalized.values() if v["effective"] and not v["rbac_final"])
 
     # Independent cross-check: the projector evaluated the published ABAC deny rules in
     # Python; Rego evaluated the same published rules against the same published facts.
     # Agreement is evidence the guard is genuinely being evaluated rather than echoed.
     # Disagreement is a finding and is reported, not smoothed over.
-    projector_deny = {
-        r["cell_id"]: bool(r.get("projector_abac_deny")) for r in requests
-    }
+    projector_deny = {r["cell_id"]: bool(r.get("projector_abac_deny")) for r in requests}
     abac_disagreements = sorted(
         cid
         for cid, v in normalized.items()
@@ -578,8 +603,11 @@ def main() -> int:
 
     report = {
         "topaz": {
-            "version": info.get("version"), "commit": info.get("commit"),
-            "date": info.get("date"), "os": info.get("os"), "arch": info.get("arch"),
+            "version": info.get("version"),
+            "commit": info.get("commit"),
+            "date": info.get("date"),
+            "os": info.get("os"),
+            "arch": info.get("arch"),
             "authorizer": f"http://{AZ_HOST}:{AZ_PORT}",
             "directory": f"http://{DS_HOST}:{DS_PORT}",
         },
@@ -609,15 +637,17 @@ def main() -> int:
         "errors": errors[:20],
     }
     (OUTDIR / "run-report.json").write_text(
-        json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
     print(f"   raw        : {OUTDIR / 'raw' / 'decisions.jsonl'}  ({len(results)} lines)")
     print(f"   normalized : {OUTDIR / 'normalized' / 'decisions.json'}  ({len(normalized)} cells)")
     print(f"   report     : {OUTDIR / 'run-report.json'}")
     print("\n   decision distribution")
     for d in DECISIONS:
-        print(f"      {d:<11} allow {distribution[d]['allow']:>5}   "
-              f"deny {distribution[d]['deny']:>5}")
+        print(
+            f"      {d:<11} allow {distribution[d]['allow']:>5}   deny {distribution[d]['deny']:>5}"
+        )
     ds.close()
     az.close()
     if errors:

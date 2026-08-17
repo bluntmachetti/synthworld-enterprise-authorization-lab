@@ -42,8 +42,19 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-
-from synthworld.enterprise import (
+from synthworld.enterprise.consumer import (
+    AuthorizationEvaluationProfileV1,
+    EnterpriseAbacIntentOverlayV1,
+    EnterpriseAbacStateOverlayV1,
+    EnterpriseAuthorizationEvaluationScopeV1,
+    EnterpriseAuthorizationEvaluatorArtifactsV1,
+    EnterpriseAuthorizationPublicArtifactsV1,
+    EnterpriseDirectoryRbacIntentOverlayV1,
+    EnterpriseEvaluationCorpusConfigV1,
+    EnterpriseIdentityAccessImportV1,
+    EnterpriseRbacSessionStateInputV1,
+    EnterpriseRebacIntentOverlayV1,
+    EnterpriseRebacStateOverlayV1,
     compile_enterprise_abac_truth,
     compile_enterprise_access_state,
     compile_enterprise_authorization_kernel,
@@ -53,6 +64,7 @@ from synthworld.enterprise import (
     compile_enterprise_identity_access_universe,
     compile_enterprise_rebac_truth,
     compose_enterprise_authorization,
+    digest_enterprise_model,
     export_enterprise_authorization,
     export_enterprise_directory_rbac,
     export_enterprise_evaluation_corpus,
@@ -61,25 +73,6 @@ from synthworld.enterprise import (
     load_public_enterprise_evaluation_corpus,
     load_public_enterprise_identity_access_universe,
     validate_enterprise_identity_access,
-)
-from synthworld.enterprise.authorization import (
-    AuthorizationEvaluationProfileV1,
-    EnterpriseAuthorizationEvaluatorArtifactsV1,
-    EnterpriseAuthorizationPublicArtifactsV1,
-)
-from synthworld.enterprise.abac import (
-    EnterpriseAbacIntentOverlayV1,
-    EnterpriseAbacStateOverlayV1,
-)
-from synthworld.enterprise.models import EnterpriseIdentityAccessImportV1
-from synthworld.enterprise.rbac import (
-    EnterpriseDirectoryRbacIntentOverlayV1,
-    EnterpriseEvaluationCorpusConfigV1,
-    EnterpriseRbacSessionStateInputV1,
-)
-from synthworld.enterprise.rebac import (
-    EnterpriseRebacIntentOverlayV1,
-    EnterpriseRebacStateOverlayV1,
 )
 
 REPO = Path(__file__).resolve().parent.parent
@@ -95,6 +88,7 @@ PUBLIC_INVENTORY = {
         "rebac-intent.json",
         "rebac-state.json",
         "authorization-composition.json",
+        "authorization-evaluation-scope.json",
         "authorization-kernel.json",
         "manifest.json",
     ],
@@ -150,27 +144,22 @@ class WorldBuilder:
         base = load_enterprise_identity_access_import(self.import_path)
         report = validate_enterprise_identity_access(base)
         if not report.valid:
-            raise SystemExit(
-                f"import invalid: {[d.code for d in report.diagnostics][:10]}"
-            )
+            raise SystemExit(f"import invalid: {[d.code for d in report.diagnostics][:10]}")
 
         # Pass 1. account_observations and direct_entitlements reference COMPILED
         # ids, which do not exist until the universe is frozen. Compile once to
         # learn the ids, enrich, then compile again. The released compiler
         # re-freezes an identical universe and the kernel compiler independently
         # verifies that (`kernel_universe_mapping_mismatch`).
-        first = compile_enterprise_identity_access_universe(
-            import_model=base, seed=self.seed
-        )
+        first = compile_enterprise_identity_access_universe(import_model=base, seed=self.seed)
         u1 = first.public_universe
         canonical = {
-            b.account_id: b.principal_id
-            for b in first.evaluator_canonical_binding_truth.bindings
+            b.account_id: b.principal_id for b in first.evaluator_canonical_binding_truth.bindings
         }
 
         document = json.loads(base.model_dump_json())
-        document["directory_rbac_state"]["account_observations"] = (
-            self._account_observations(u1, canonical)
+        document["directory_rbac_state"]["account_observations"] = self._account_observations(
+            u1, canonical
         )
         enriched = _from_json(EnterpriseIdentityAccessImportV1, document)
 
@@ -181,12 +170,8 @@ class WorldBuilder:
                 f"{[(d.code, d.logical_key) for d in report2.diagnostics][:10]}"
             )
 
-        result = compile_enterprise_identity_access_universe(
-            import_model=enriched, seed=self.seed
-        )
-        export_enterprise_identity_access_compile_result(
-            self.root / "identity-access", result
-        )
+        result = compile_enterprise_identity_access_universe(import_model=enriched, seed=self.seed)
+        export_enterprise_identity_access_compile_result(self.root / "identity-access", result)
         self.enriched_import = enriched
         self.universe = load_public_enterprise_identity_access_universe(
             self.root / "identity-access"
@@ -287,9 +272,7 @@ class WorldBuilder:
         for g in self.kernel.role_grants:
             perm = self.perm_by_id[g.permission_id]
             self.role_actions.setdefault(g.role_id, set()).add(perm.action)
-            self.role_targets.setdefault(g.role_id, set()).add(
-                perm.authorization_target_id
-            )
+            self.role_targets.setdefault(g.role_id, set()).add(perm.authorization_target_id)
         self._build_derivation_index()
         self.stats["kernel"] = {
             "memberships": len(self.kernel.memberships),
@@ -387,9 +370,7 @@ class WorldBuilder:
                 self.derived_permissions[sid] = perms
 
     def _derives(self, atom: Any) -> bool:
-        pid = self.permission_id_by_pair.get(
-            (atom.authorization_target_id, atom.action)
-        )
+        pid = self.permission_id_by_pair.get((atom.authorization_target_id, atom.action))
         if pid is None:
             return False
         return pid in self.derived_permissions.get(atom.subject_id, ())
@@ -421,9 +402,7 @@ class WorldBuilder:
         # cell regardless of what the role graph says.
         if is_account and sid in self.mismatch_accounts:
             return "E"
-        if is_account and (
-            sid in self.suspended_accounts or sid in self.expiring_accounts
-        ):
+        if is_account and (sid in self.suspended_accounts or sid in self.expiring_accounts):
             return "F"
         # No derivable role path at all -> the principal genuinely lacks the
         # required role or relation. Checked BEFORE the guard classes so a cell is
@@ -536,13 +515,9 @@ class WorldBuilder:
                 "evaluator_cases": evaluator_cases,
             },
         )
-        result = compile_enterprise_evaluation_corpus(
-            universe=self.universe, corpus_config=cfg
-        )
+        result = compile_enterprise_evaluation_corpus(universe=self.universe, corpus_config=cfg)
         export_enterprise_evaluation_corpus(self.root / "evaluation-corpus", result)
-        self.corpus = load_public_enterprise_evaluation_corpus(
-            self.root / "evaluation-corpus"
-        )
+        self.corpus = load_public_enterprise_evaluation_corpus(self.root / "evaluation-corpus")
         self.corpus_digest = _manifest_digest(
             self.root / "evaluation-corpus", "public", "evaluation-corpus.json"
         )
@@ -558,8 +533,7 @@ class WorldBuilder:
         # context per atom, so (access_atom_id, tick) is a sufficient key and
         # matches the cell_key format used above.
         self.cell_id_by_key = {
-            f"cell-{c.access_atom_id}-t{c.tick}": c.cell_id
-            for c in self.corpus.evaluation_cells
+            f"cell-{c.access_atom_id}-t{c.tick}": c.cell_id for c in self.corpus.evaluation_cells
         }
         if len(self.cell_id_by_key) != len(self.corpus.evaluation_cells):
             raise SystemExit(
@@ -571,9 +545,7 @@ class WorldBuilder:
             raise SystemExit(f"{len(missing)} declared cells missing from corpus")
         self.cell_key_by_id = {v: k for k, v in self.cell_id_by_key.items()}
         self.cell_by_id = {c.cell_id: c for c in self.corpus.evaluation_cells}
-        self.case_by_cell_id = {
-            self.cell_id_by_key[k]: v for k, v in self.case_assignment.items()
-        }
+        self.case_by_cell_id = {self.cell_id_by_key[k]: v for k, v in self.case_assignment.items()}
         counts: dict[str, int] = {}
         for v in self.case_assignment.values():
             counts[CASE_LABELS[v]] = counts.get(CASE_LABELS[v], 0) + 1
@@ -593,9 +565,7 @@ class WorldBuilder:
         `intended_decision` is consequently not derivable from any public artifact.
         See the limitations report."""
         drop_grant = {
-            g.edge_id
-            for g in self.kernel.role_grants
-            if _pick(g.edge_id + ":sprawl", 25) == 0
+            g.edge_id for g in self.kernel.role_grants if _pick(g.edge_id + ":sprawl", 25) == 0
         }
         intent = {
             "identity_access_universe_digest": self.universe_digest,
@@ -605,7 +575,10 @@ class WorldBuilder:
                 for m in self.kernel.memberships
             ],
             "intended_group_nesting": [
-                {"child_group_id": n.child_group_id, "parent_group_id": n.parent_group_id}
+                {
+                    "child_group_id": n.child_group_id,
+                    "parent_group_id": n.parent_group_id,
+                }
                 for n in self.kernel.group_nesting
             ],
             "intended_group_role_assignments": [
@@ -709,16 +682,22 @@ class WorldBuilder:
             else:
                 allow_cells.append(cid)
 
-            def fact(kind: str, key: str, category: str, value: Any) -> dict:
+            def fact(
+                kind: str,
+                key: str,
+                category: str,
+                value: Any,
+                cell_id: str = cid,
+            ) -> dict:
                 return {
                     "kind": kind,
                     "category": category,
                     "attribute_key": key,
-                    "fact_id": f"f-{kind}-{cid}",
-                    "cell_id": cid,
+                    "fact_id": f"f-{kind}-{cell_id}",
+                    "cell_id": cell_id,
                     "value_state": "known",
                     "value": value,
-                    "revision_id": _rev(kind, cid),
+                    "revision_id": _rev(kind, cell_id),
                     "valid_from_tick": 0,
                     "valid_until_tick": None,
                 }
@@ -905,6 +884,35 @@ class WorldBuilder:
             composition=composition,
             evaluation_profile=profile,
         )
+        atoms = {item.access_atom_id: item for item in self.universe.access_atoms}
+        evaluation_scope = _from_json(
+            EnterpriseAuthorizationEvaluationScopeV1,
+            {
+                "evaluation_corpus_digest": self.corpus_digest,
+                "authorization_kernel_digest": digest_enterprise_model(
+                    authorization_kernel
+                ).model_dump(mode="json"),
+                "cells": [
+                    {
+                        "cell_id": cell.cell_id,
+                        "scored_dimensions": [
+                            "effective_decision",
+                            "final_decision",
+                            "policy_conflict",
+                            *(
+                                ["lifecycle_status"]
+                                if self.subject_by_id[
+                                    atoms[cell.access_atom_id].subject_id
+                                ].subject_kind
+                                == "account"
+                                else []
+                            ),
+                        ],
+                    }
+                    for cell in self.corpus.evaluation_cells
+                ],
+            },
+        )
         access_state = compile_enterprise_access_state(
             universe=self.universe,
             canonical_binding_truth=self.binding_truth,
@@ -926,6 +934,7 @@ class WorldBuilder:
                 rebac_state=self.rebac_state,
                 rebac_intent=self.rebac_intent,
                 composition=composition,
+                evaluation_scope=evaluation_scope,
                 kernel=authorization_kernel,
             ),
             evaluator=EnterpriseAuthorizationEvaluatorArtifactsV1(
@@ -942,7 +951,13 @@ class WorldBuilder:
         """Copy ONLY the public files into zone 02 and record a digest for each so
         the isolation boundary is verifiable, not merely asserted."""
         if public_root.exists():
-            shutil.rmtree(public_root)
+            # The root is a Compose bind-mount in the reference lab and therefore
+            # cannot itself be removed. Clear only its generated children.
+            for child in public_root.iterdir():
+                if child.is_dir():
+                    shutil.rmtree(child)
+                else:
+                    child.unlink()
         index: dict[str, str] = {}
         for tree, files in sorted(PUBLIC_INVENTORY.items()):
             src = self.root / tree / "public"

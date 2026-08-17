@@ -15,9 +15,27 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.metadata
 import json
 import sys
 from pathlib import Path
+
+import yaml
+from synthworld.enterprise.authorization.adversarial import (
+    EnterpriseAdversarialAuthorizationPredictionV1,
+    EnterpriseAdversarialAuthorizationPublicV1,
+)
+from synthworld.enterprise.consumer import (
+    EnterpriseAuthorizationCompositionV1,
+    EnterpriseAuthorizationEvaluationScopeV1,
+    EnterpriseAuthorizationKernelV1,
+    EnterpriseAuthorizationPredictionV1,
+    EnterpriseDirectoryRbacKernelV1,
+    EnterpriseEvaluationCorpusV1,
+    EnterpriseIdentityAccessUniverseV1,
+    canonical_enterprise_model_bytes,
+    digest_enterprise_model,
+)
 
 REPO = Path(__file__).resolve().parent.parent
 FORBIDDEN = (REPO / "06-evaluator").resolve()
@@ -39,21 +57,68 @@ def read_json(path: Path):
 
 def canonical_bytes(document) -> bytes:
     """Stable serialization so the digest is reproducible byte for byte."""
-    return json.dumps(
-        document, sort_keys=True, separators=(",", ":"), ensure_ascii=False
-    ).encode("utf-8")
+    return json.dumps(document, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode(
+        "utf-8"
+    )
+
+
+def sha256_file(path: Path) -> str:
+    return hashlib.sha256(guard(path).read_bytes()).hexdigest()
+
+
+def read_model(model, path: Path):
+    return model.model_validate_json(guard(path).read_bytes())
+
+
+def lifecycle_status(observation, tick: int) -> str:
+    if observation is None:
+        return "inactive"
+    if tick < observation.valid_from_tick:
+        return "not_yet_valid"
+    if observation.valid_until_tick is not None and tick >= observation.valid_until_tick:
+        return "expired"
+    if str(observation.administrative_state) != "active":
+        return "inactive"
+    return "active"
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--public", default=str(REPO / "02-synthworld-public"))
     ap.add_argument("--decisions", default=str(REPO / "04-topaz-results/normalized/decisions.json"))
+    ap.add_argument(
+        "--adversarial-decisions",
+        default=str(REPO / "04-topaz-results/adversarial/decisions.json"),
+    )
     ap.add_argument("--out", default=str(REPO / "05-submission"))
     args = ap.parse_args()
 
     public = Path(args.public)
-    corpus = read_json(public / "evaluation-corpus/evaluation-corpus.json")
-    cell_ids = [c["cell_id"] for c in corpus["evaluation_cells"]]
+    universe_model = read_model(
+        EnterpriseIdentityAccessUniverseV1,
+        public / "identity-access/identity-access-universe.json",
+    )
+    corpus_model = read_model(
+        EnterpriseEvaluationCorpusV1,
+        public / "evaluation-corpus/evaluation-corpus.json",
+    )
+    directory_kernel = read_model(
+        EnterpriseDirectoryRbacKernelV1,
+        public / "directory-rbac/directory-rbac-kernel.json",
+    )
+    composition = read_model(
+        EnterpriseAuthorizationCompositionV1,
+        public / "authorization/authorization-composition.json",
+    )
+    authorization_kernel = read_model(
+        EnterpriseAuthorizationKernelV1,
+        public / "authorization/authorization-kernel.json",
+    )
+    evaluation_scope = read_model(
+        EnterpriseAuthorizationEvaluationScopeV1,
+        public / "authorization/authorization-evaluation-scope.json",
+    )
+    cell_ids = [c.cell_id for c in corpus_model.evaluation_cells]
     decisions = read_json(Path(args.decisions))
 
     missing = [c for c in cell_ids if c not in decisions]
@@ -125,7 +190,7 @@ def main() -> int:
     # (closure-expanded over group membership, group nesting and role hierarchy).
     # Every access subject must appear, including those holding no role at all -
     # omitting them would silently shrink the denominator instead of being scored.
-    universe = read_json(public / "identity-access/identity-access-universe.json")
+    universe = universe_model.model_dump(mode="json")
     role_sets_path = Path(args.decisions).parent / "role-sets.json"
     topaz_role_sets = read_json(role_sets_path) if role_sets_path.exists() else {}
     authorized_role_sets = [
@@ -139,7 +204,7 @@ def main() -> int:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
-    submissions = {
+    submission_documents = {
         "directory-rbac-prediction.json": {
             "schema_version": "1.0.0",
             "cells": rbac_cells,
@@ -157,30 +222,228 @@ def main() -> int:
         "rebac-prediction.json": {"schema_version": "1.0.0", "cells": rebac_cells},
     }
 
+    atom_by_id = {item.access_atom_id: item for item in universe_model.access_atoms}
+    subject_by_id = {item.subject_id: item for item in universe_model.access_subjects}
+    observation_by_account = {
+        item.account_id: item for item in directory_kernel.account_observations
+    }
+    corpus_cell_by_id = {item.cell_id: item for item in corpus_model.evaluation_cells}
+    scope_by_cell = {
+        item.cell_id: {str(dimension) for dimension in item.scored_dimensions}
+        for item in evaluation_scope.cells
+    }
+    composed_cells = []
+    for cid in cell_ids:
+        observed = decisions.get(cid) or {
+            "effective": False,
+            "final": False,
+            "abac": "deny",
+        }
+        rbac = verdict(observed["effective"])
+        abac = observed.get("abac", "deny")
+        dimensions = scope_by_cell[cid]
+        row = {
+            "cell_id": cid,
+            "mechanism_outcomes": {"rbac": rbac, "abac": abac},
+            "effective_decision": (
+                verdict(observed["effective"] and abac == "allow")
+                if "effective_decision" in dimensions
+                else None
+            ),
+            "final_decision": (
+                verdict(observed["final"]) if "final_decision" in dimensions else None
+            ),
+            "policy_conflict": (
+                bool(
+                    (observed["effective"] and abac == "deny")
+                    or (not observed["effective"] and abac == "allow")
+                )
+                if "policy_conflict" in dimensions
+                else None
+            ),
+        }
+        if "lifecycle_status" in dimensions:
+            corpus_cell = corpus_cell_by_id[cid]
+            atom = atom_by_id[corpus_cell.access_atom_id]
+            subject = subject_by_id[atom.subject_id]
+            if str(subject.subject_kind) != "account":
+                raise SystemExit(f"public scope selected lifecycle_status for principal cell {cid}")
+            row["lifecycle_status"] = lifecycle_status(
+                observation_by_account.get(subject.subject_id), corpus_cell.tick
+            )
+        composed_cells.append(row)
+
+    run_report = read_json(Path(args.decisions).parents[1] / "run-report.json")
+    adversarial_run_report = read_json(Path(args.adversarial_decisions).parent / "run-report.json")
+    config = yaml.safe_load(guard(REPO / "01-source/config/experiment.yaml").read_text("utf-8"))
+    policy_path = REPO / "03-topaz-input/policy/britannia/authz.rego"
+    composed_prediction = EnterpriseAuthorizationPredictionV1.model_validate_json(
+        json.dumps(
+            {
+                "identity_access_universe_digest": digest_enterprise_model(
+                    universe_model
+                ).model_dump(mode="json"),
+                "evaluation_corpus_digest": digest_enterprise_model(corpus_model).model_dump(
+                    mode="json"
+                ),
+                "composition_digest": digest_enterprise_model(composition).model_dump(mode="json"),
+                "authorization_kernel_digest": digest_enterprise_model(
+                    authorization_kernel
+                ).model_dump(mode="json"),
+                "evaluation_scope_digest": digest_enterprise_model(evaluation_scope).model_dump(
+                    mode="json"
+                ),
+                "execution": {
+                    "synthworld_package_version": importlib.metadata.version(
+                        "idcognito-synthworld"
+                    ),
+                    "adapter_name": "synthworld-enterprise-authorization-lab-topaz",
+                    "adapter_version": "1.0.0",
+                    "system_name": "Aserto Topaz",
+                    "system_version": run_report["topaz"]["version"],
+                    "policy_name": "britannia-composed-authorization",
+                    "policy_version": "1.0.0",
+                    "policy_sha256": hashlib.sha256(policy_path.read_bytes()).hexdigest(),
+                },
+                "cells": composed_cells,
+            }
+        )
+    )
+
+    submissions = {
+        name: canonical_bytes(document) + b"\n" for name, document in submission_documents.items()
+    }
+    submissions["enterprise-authorization-prediction.json"] = canonical_enterprise_model_bytes(
+        composed_prediction
+    )
+
+    adversarial_public = read_model(
+        EnterpriseAdversarialAuthorizationPublicV1,
+        public / "adversarial/enterprise-adversarial-authorization.json",
+    )
+    adversarial_decisions = read_json(Path(args.adversarial_decisions))
+    attempt_by_id = {item.attempt_id: item for item in adversarial_public.attempts}
+    if set(adversarial_decisions) != set(attempt_by_id):
+        raise SystemExit("adversarial Topaz result inventory differs from public attempts")
+    adversarial_prediction = EnterpriseAdversarialAuthorizationPredictionV1.model_validate_json(
+        json.dumps(
+            {
+                "public_digest": digest_enterprise_model(adversarial_public).model_dump(
+                    mode="json"
+                ),
+                "attempts": [
+                    {
+                        "attempt_id": attempt_id,
+                        "resolved_principal_id": result["resolved_principal_id"],
+                        "binding_status": (
+                            "missing"
+                            if result["resolved_principal_id"] is None
+                            else (
+                                "matches_canonical"
+                                if result["resolved_principal_id"]
+                                == attempt_by_id[attempt_id].presented_principal_id
+                                else "mismatch"
+                            )
+                        ),
+                        "decision": "allow" if result["allow"] else "deny",
+                    }
+                    for attempt_id, result in sorted(adversarial_decisions.items())
+                ],
+            }
+        )
+    )
+    submissions["adversarial-authorization-prediction.json"] = canonical_enterprise_model_bytes(
+        adversarial_prediction
+    )
+
     digests = {}
-    for name, document in sorted(submissions.items()):
-        data = canonical_bytes(document)
-        (out / name).write_bytes(data + b"\n")
+    for name, data in sorted(submissions.items()):
+        (out / name).write_bytes(data)
         digests[name] = hashlib.sha256(data).hexdigest()
 
-    # The pre-scoring digest. Recorded here, before stage 60 opens anything under
-    # 06-evaluator. Stage 60 re-computes these and refuses to score if they moved.
+    evidence_paths = [
+        "02-synthworld-public/PUBLIC-INDEX.json",
+        "03-topaz-input/policy/.manifest",
+        "03-topaz-input/policy/adversarial/authz.rego",
+        "03-topaz-input/policy/britannia/authz.rego",
+        "04-topaz-results/isolation-report.json",
+        "04-topaz-results/run-report.json",
+        "04-topaz-results/raw/decisions.jsonl",
+        "04-topaz-results/normalized/decisions.json",
+        "04-topaz-results/normalized/role-sets.json",
+        "04-topaz-results/adversarial/run-report.json",
+        "04-topaz-results/adversarial/raw-decisions.jsonl",
+        "04-topaz-results/adversarial/decisions.json",
+        "bin/05_check_isolation.py",
+        "bin/30_project_topaz.py",
+        "bin/35_project_adversarial.py",
+        "bin/40_run_topaz.py",
+        "bin/45_run_adversarial.py",
+        "bin/50_build_submission.py",
+    ]
+    evidence = {name: sha256_file(REPO / name) for name in sorted(evidence_paths)}
+    public_index = read_json(REPO / "02-synthworld-public/PUBLIC-INDEX.json")
+    isolation_report = read_json(REPO / "04-topaz-results/isolation-report.json")
+    if not isolation_report.get("passed"):
+        raise SystemExit("refusing to seal a submission that failed isolation checks")
+    if not isolation_report.get("public_input_read_only"):
+        raise SystemExit("refusing to seal without a read-only public input mount")
+
+    # The pre-scoring seal. It binds the predictions to their public inputs, raw
+    # system responses, policy, adapter source, runtime, and isolation proof.
+    # Stage 60 verifies every byte before it opens evaluator truth.
     manifest = {
-        "submission_schema": "britannia-phase2-submission/1",
+        "seal_schema": "synthworld-enterprise-authorization-submission-seal/2",
         "cells_in_public_corpus": len(cell_ids),
         "cells_answered_by_topaz": len(cell_ids) - len(missing),
         "cells_defaulted_to_deny": len(missing),
-        "sha256": digests,
+        "submission_sha256": digests,
         "combined_sha256": hashlib.sha256(
             canonical_bytes({k: digests[k] for k in sorted(digests)})
         ).hexdigest(),
+        "evidence_sha256": evidence,
+        "public_artifact_sha256": public_index["sha256"],
+        "provenance": {
+            "synthworld": {
+                "distribution": config["synthworld"]["package"],
+                "version": importlib.metadata.version("idcognito-synthworld"),
+                "wheel_sha256": config["synthworld"]["wheel_sha256"],
+                "sdist_sha256": config["synthworld"]["sdist_sha256"],
+            },
+            "topaz": {
+                "image": config["topaz"]["image"],
+                "version": run_report["topaz"]["version"],
+                "commit": run_report["topaz"]["commit"],
+                "adversarial_version": adversarial_run_report["topaz"]["version"],
+                "adversarial_commit": adversarial_run_report["topaz"]["commit"],
+            },
+            "adapter": {
+                "name": "synthworld-enterprise-authorization-lab-topaz",
+                "version": "1.0.0",
+                "source_sha256": hashlib.sha256(
+                    canonical_bytes(
+                        {
+                            name: evidence[name]
+                            for name in sorted(evidence)
+                            if name.startswith("bin/")
+                        }
+                    )
+                ).hexdigest(),
+            },
+        },
+        "schema_versions": {
+            "enterprise_authorization_prediction": composed_prediction.schema_version,
+            "enterprise_adversarial_public": adversarial_public.schema_version,
+            "enterprise_adversarial_prediction": adversarial_prediction.schema_version,
+        },
         "evaluator_artifacts_read": False,
         "note": (
-            "Digests recorded before any evaluator artifact was opened. Stage 60 "
-            "verifies them before scoring."
+            "Seal recorded inside the evaluator-free SUT container. Stage 60 "
+            "verifies all bound evidence before opening evaluator truth."
         ),
     }
-    (out / "SUBMISSION-DIGEST.json").write_text(
+    manifest["seal_sha256"] = hashlib.sha256(canonical_bytes(manifest)).hexdigest()
+    (out / "SUBMISSION-SEAL.json").write_text(
         json.dumps(manifest, indent=1, sort_keys=True) + "\n", "utf-8"
     )
     print(json.dumps(manifest, indent=1, sort_keys=True))

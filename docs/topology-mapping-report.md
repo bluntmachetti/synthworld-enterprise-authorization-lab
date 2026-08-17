@@ -17,7 +17,7 @@ recomputed from the artefacts named below, not copied from a prior summary.
 | Blocked pairs | `/home/kademolu/Projects/agent-auth-2/01-source/generated/cross-boundary-pairs.json` (135 ownership + 49 dependency) |
 | Emitted import document | `/home/kademolu/Projects/agent-auth-2/01-source/generated/britannia-identity-access-import.yaml` (SHA-256 `6f893fce79bb68c55b9157acafc398f5b5abf37c615050470b06e5ee3ba21e13`) |
 | Compiled universe | `/home/kademolu/Projects/agent-auth-2/02-synthworld-public/identity-access/identity-access-universe.json` (digest `a4c7bcfb…66a7c6`, seed `20260816`) |
-| SynthWorld | `idcognito-synthworld==0.15.0` |
+| SynthWorld | `idcognito-synthworld==0.16.0` |
 
 The adapter's output is a pure function of (topology bytes, `experiment.yaml` bytes). The
 compilation seed affects selector resolution only.

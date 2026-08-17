@@ -1,5 +1,10 @@
 # Phase 1 vs Phase 2 — what this phase tests that the tuple round-trip did not
 
+> Historical comparison: this document describes the original 0.15 Phase 2
+> baseline. The current 0.16 reference lab adds composed scoring, an adversarial
+> lane, enforced container isolation, and publication-grade sealing. See the
+> repository README and `docs/results.md` for current claims.
+
 Phase 1 lives at `~/Projects/agent-auth`. It was read only, never executed or
 modified. Every Phase 1 claim below is quoted from its own files.
 

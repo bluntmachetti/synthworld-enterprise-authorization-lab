@@ -1,4 +1,4 @@
-# Britannia Phase 2 — experiment configuration
+# SynthWorld enterprise authorization reference lab configuration
 #
 # Every constant that the topology -> SynthWorld adapter uses lives here, so the
 # transformation is auditable rather than buried in code. Nothing in this file is
@@ -7,13 +7,14 @@
 # ZONE: 01-source (source topology + experiment configuration)
 
 experiment:
-  id: britannia-topaz-phase2
-  phase: 2
+  id: synthworld-enterprise-authorization-reference-lab
+  phase: 3
   description: >-
     Compile britannia_global_bank_topology.yaml into a deterministic SynthWorld
     enterprise identity/access universe, project it into Aserto Topaz, exercise
     Topaz authorization decisions against a real Rego policy, and score the
-    decisions with SynthWorld's enterprise directory-RBAC benchmark scorer.
+    decisions with SynthWorld's composed, mechanism-specific, and adversarial
+    enterprise authorization scorers.
 
 source:
   topology: britannia_global_bank_topology.yaml
@@ -21,9 +22,9 @@ source:
 
 synthworld:
   package: idcognito-synthworld
-  version: "0.15.0"
-  wheel_sha256: f1b17f8254521d307e38cfc3a44d00844308dd36c7972da00b816b92e257ee60
-  sdist_sha256: c278758e47c4545b46a9f234dab53163a0899440fd55684805104087b8ca9d8c
+  version: "0.16.0"
+  wheel_sha256: dfe584e52185fe1e2b0da238589492ac5995b21a33e7ce1cb7dac0c3330dc480
+  sdist_sha256: 8841225c263d13761466d7a9beb5f2378c2c2ae69c9471a6d37ad815a49deb57
 
 determinism:
   # Single seed governs SynthWorld compilation. Adapter output is a pure function
@@ -221,7 +222,9 @@ authorization:
 # Topaz projection.
 # ---------------------------------------------------------------------------
 topaz:
-  # Populated by infra/docker-compose.yaml; recorded here for the manifest.
+  image: ghcr.io/aserto-dev/topaz:0.33.16@sha256:835868c04bdd7129127ea43642ffff7363d0bd26d5e1a37631fa881431054360
+  version: "0.33.16"
+  commit: 81b8405
   policy_root: britannia
   policy_package: britannia.authz
   decision_name: allowed

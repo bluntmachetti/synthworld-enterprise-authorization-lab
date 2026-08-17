@@ -57,7 +57,7 @@ def load(path: Path):
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default=str(REPO / "reports/validation-report.json"))
+    ap.add_argument("--out", default=str(REPO / "07-reports/validation-report.json"))
     args = ap.parse_args()
     r = Report()
 
@@ -68,10 +68,6 @@ def main() -> int:
         "source topology digest matches experiment.yaml",
         sha256_file(topo) == cfg["source"]["topology_sha256"],
         sha256_file(topo),
-    )
-    r.check(
-        "source topology is byte-identical to the supplied file",
-        sha256_file(topo) == sha256_file(REPO / "britannia_global_bank_topology.yaml"),
     )
     ledger = load(REPO / "01-source/generated/mapping-ledger.json")
     r.counts["topology_fields_classified"] = len(ledger["ledger"])
@@ -107,7 +103,11 @@ def main() -> int:
     mirror_ok = True
     for rel in sorted(index):
         tree, name = rel.split("/", 1)
-        src = evaluator_root / tree / "public" / name
+        src = (
+            REPO / "06-evaluator/artifacts/adversarial/public" / name
+            if tree == "adversarial"
+            else evaluator_root / tree / "public" / name
+        )
         if not src.exists() or sha256_file(src) != index[rel]:
             mirror_ok = False
     r.check("zone 2 is a byte-identical copy of zone 6 public files", mirror_ok)
@@ -115,7 +115,8 @@ def main() -> int:
     stray = sorted(
         p.relative_to(public).as_posix()
         for p in public.rglob("*")
-        if p.is_file() and p.name != "PUBLIC-INDEX.json"
+        if p.is_file()
+        and p.name != "PUBLIC-INDEX.json"
         and p.relative_to(public).as_posix() not in index
     )
     r.check("zone 2 contains no file outside the public inventory", not stray, str(stray))
@@ -123,7 +124,11 @@ def main() -> int:
     # Determinism: the compiled artifacts must reproduce the recorded digests.
     expected = cfg["determinism"].get("expected_digests", {})
     for artifact, tree, name in (
-        ("identity_access_universe", "identity-access", "identity-access-universe.json"),
+        (
+            "identity_access_universe",
+            "identity-access",
+            "identity-access-universe.json",
+        ),
         ("evaluation_corpus", "evaluation-corpus", "evaluation-corpus.json"),
     ):
         want = expected.get(artifact)
@@ -144,12 +149,8 @@ def main() -> int:
     universe = load(public / "identity-access/identity-access-universe.json")
     corpus = load(public / "evaluation-corpus/evaluation-corpus.json")
     kernel = load(public / "directory-rbac/directory-rbac-kernel.json")
-    r.counts["universe"] = {
-        k: len(v) for k, v in sorted(universe.items()) if isinstance(v, list)
-    }
-    r.counts["corpus"] = {
-        k: len(v) for k, v in sorted(corpus.items()) if isinstance(v, list)
-    }
+    r.counts["universe"] = {k: len(v) for k, v in sorted(universe.items()) if isinstance(v, list)}
+    r.counts["corpus"] = {k: len(v) for k, v in sorted(corpus.items()) if isinstance(v, list)}
     r.counts["directory_kernel"] = {
         k: len(v) for k, v in sorted(kernel.items()) if isinstance(v, list)
     }
@@ -158,9 +159,7 @@ def main() -> int:
     subject_ids = {s["subject_id"] for s in universe["access_subjects"]}
     target_ids = {t["authorization_target_id"] for t in universe["authorization_targets"]}
     atom_ids = {a["access_atom_id"] for a in universe["access_atoms"]}
-    perm_pairs = {
-        (p["authorization_target_id"], p["action"]) for p in universe["permissions"]
-    }
+    perm_pairs = {(p["authorization_target_id"], p["action"]) for p in universe["permissions"]}
     r.check(
         "every access atom references a known subject",
         all(a["subject_id"] in subject_ids for a in universe["access_atoms"]),
@@ -258,14 +257,19 @@ def main() -> int:
 
     # ---------------------------------------------------------------- zone 5
     sub = REPO / "05-submission"
-    if (sub / "SUBMISSION-DIGEST.json").exists():
-        manifest = load(sub / "SUBMISSION-DIGEST.json")
+    if (sub / "SUBMISSION-SEAL.json").exists():
+        manifest = load(sub / "SUBMISSION-SEAL.json")
         ok = True
-        for name, digest in sorted(manifest["sha256"].items()):
-            raw_bytes = (sub / name).read_bytes().rstrip(b"\n")
+        for name, digest in sorted(manifest["submission_sha256"].items()):
+            raw_bytes = (sub / name).read_bytes()
             if hashlib.sha256(raw_bytes).hexdigest() != digest:
                 ok = False
         r.check("submission files match their sealed digests", ok)
+        evidence_ok = all(
+            (REPO / name).is_file() and sha256_file(REPO / name) == digest
+            for name, digest in manifest["evidence_sha256"].items()
+        )
+        r.check("sealed public, policy, result, and adapter evidence matches", evidence_ok)
         r.counts["submission"] = {
             "combined_sha256": manifest["combined_sha256"],
             "cells": manifest["cells_in_public_corpus"],
@@ -281,7 +285,7 @@ def main() -> int:
         r.check("zone 5 populated", False, "stage 50 has not run")
 
     # ---------------------------------------------------------------- zone 6
-    scoring = REPO / "06-evaluator/scoring/scoring-report.json"
+    scoring = REPO / "07-reports/scoring/scoring-report.json"
     if scoring.exists():
         report = load(scoring)
         r.check(
@@ -300,12 +304,58 @@ def main() -> int:
         r.counts["scoring"] = {
             "scored_metrics": len(report.get("scored_metrics", [])),
             "not_publicly_winnable": len(report.get("not_publicly_winnable", [])),
-            "world_property_metrics": len(
-                report.get("world_property_metrics_not_scores", [])
-            ),
+            "world_property_metrics": len(report.get("world_property_metrics_not_scores", [])),
         }
     else:
-        r.check("zone 6 scoring present", False, "stage 60 has not run")
+        r.check("scoring report present", False, "stage 60 has not run")
+
+    adversarial_results = REPO / "04-topaz-results/adversarial/decisions.json"
+    if adversarial_results.exists():
+        r.check(
+            "all 14 adversarial attempts were normalized",
+            len(load(adversarial_results)) == 14,
+        )
+    else:
+        r.check("adversarial Topaz results present", False, "stage 45 has not run")
+
+    isolation = REPO / "04-topaz-results/isolation-report.json"
+    if isolation.exists():
+        isolation_report = load(isolation)
+        r.check("SUT isolation check passed", isolation_report.get("passed") is True)
+        r.check(
+            "SUT public input was mounted read-only",
+            isolation_report.get("public_input_read_only") is True,
+        )
+        r.check(
+            "SUT had no evaluator filesystem capability",
+            not isolation_report.get("evaluator_paths_present")
+            and not isolation_report.get("evaluator_mounts_present"),
+        )
+    else:
+        r.check("SUT isolation report present", False, "stage 05 has not run")
+
+    negative = REPO / "07-reports/negative-controls.json"
+    if negative.exists():
+        negative_report = load(negative)
+        r.check(
+            "all faulty controls are discriminated",
+            negative_report.get("passed") is True and negative_report.get("controls_total") == 9,
+            f"{negative_report.get('controls_passed')}/{negative_report.get('controls_total')}",
+        )
+    else:
+        r.check("negative-control report present", False, "stage 75 has not run")
+
+    seal_controls = REPO / "07-reports/seal-negative-controls.json"
+    if seal_controls.exists():
+        seal_control_report = load(seal_controls)
+        r.check(
+            "all seal refusal paths are enforced",
+            seal_control_report.get("passed") is True
+            and seal_control_report.get("controls_total") == 4,
+            f"{seal_control_report.get('controls_passed')}/{seal_control_report.get('controls_total')}",
+        )
+    else:
+        r.check("seal negative-control report present", False, "stage 55 has not run")
 
     # --------------------------------------------------- leakage: viz + zone 3
     viz = REPO / "viz/britannia-world.html"
@@ -331,25 +381,26 @@ def main() -> int:
 
     installed = md.version("idcognito-synthworld")
     r.check(
-        "installed SynthWorld distribution is exactly 0.15.0",
-        installed == "0.15.0",
+        "installed SynthWorld distribution matches experiment configuration",
+        installed == cfg["synthworld"]["version"] == "0.16.0",
         installed,
     )
-    # The wheel hash recorded in experiment.yaml must match what PyPI publishes for
-    # 0.15.0. Recorded rather than re-downloaded so validation stays offline.
+    # Recorded rather than re-downloaded so validation stays offline.
     r.check(
         "recorded wheel digest is a 64-char sha256",
         len(cfg["synthworld"]["wheel_sha256"]) == 64
         and all(c in "0123456789abcdef" for c in cfg["synthworld"]["wheel_sha256"]),
     )
     r.counts["synthworld"] = {
-        "version": "0.15.0",
+        "version": installed,
         "wheel_sha256": cfg["synthworld"]["wheel_sha256"],
     }
 
-    compose = (REPO / "infra/docker-compose.yaml").read_text("utf-8")
+    compose = (REPO / "compose.yaml").read_text("utf-8")
     r.check("topaz image is pinned by digest", "@sha256:" in compose)
     r.check("no :latest tag in compose", ":latest" not in compose)
+    r.check("Topaz has no published host ports", "\n    ports:" not in compose)
+    r.check("SUT network is internal", "internal: true" in compose)
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -362,8 +413,10 @@ def main() -> int:
     out.write_text(json.dumps(payload, indent=1, sort_keys=True) + "\n", "utf-8")
 
     for c in r.checks:
-        print(f"  [{'PASS' if c['pass'] else 'FAIL'}] {c['check']}"
-              + (f"  -- {c['detail']}" if c["detail"] and not c["pass"] else ""))
+        print(
+            f"  [{'PASS' if c['pass'] else 'FAIL'}] {c['check']}"
+            + (f"  -- {c['detail']}" if c["detail"] and not c["pass"] else "")
+        )
     print(f"\n{len(r.checks) - r.failed}/{len(r.checks)} checks passed")
     print(f"report -> {out}")
     return 1 if r.failed else 0
